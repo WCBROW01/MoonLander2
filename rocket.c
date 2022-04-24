@@ -7,9 +7,12 @@
 #define SIZE_MOD 4
 #define FLOOR_HEIGHT 32
 #define ACCEL 98.0
-#define TICKRATE 100
+#define TICKRATE 60
 #define ACCEL_PER_TICK (ACCEL / TICKRATE)
 #define MS_PER_TICK (1000 / TICKRATE)
+#define ANIM_RATE 15
+#define ANIM_TIME (TICKRATE / ANIM_RATE)
+#define NUM_FRAMES 2
 
 
 Uint32 Rocket_physics(Uint32 interval, void *param) {
@@ -17,8 +20,15 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 
 	if (r->state) {
 		r->velocity += ACCEL_PER_TICK;
+		++r->anim_timer;
+		if (r->anim_timer == ANIM_TIME) {
+			++r->anim_frame;
+			r->anim_frame %= NUM_FRAMES;
+			r->anim_timer = 0;
+		}
 	} else {
 		r->velocity -= ACCEL_PER_TICK;
+		r->anim_frame = 0;
 	}
 
 	if (r->pos > 0.0) {
@@ -60,6 +70,8 @@ void Rocket_reset(Rocket *r) {
 	r->pos = 200;
 	r->velocity = 0;
 	r->state = 0;
+	r->anim_frame = 0;
+	r->anim_timer = 0;
 }
 
 void Rocket_render(Rocket *r) {
@@ -73,5 +85,5 @@ void Rocket_render(Rocket *r) {
 		.h = ROCKET_HEIGHT * SIZE_MOD
 	};
 
-	SDL_RenderCopy(r->renderer, r->sprite_sheet, &r->sprite_clips[r->state], &rocket_rect);
+	SDL_RenderCopy(r->renderer, r->sprite_sheet, &r->sprite_clips[r->state + r->anim_frame], &rocket_rect);
 }
