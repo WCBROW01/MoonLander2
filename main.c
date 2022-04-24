@@ -5,9 +5,8 @@
 
 #include "rocket.h"
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define FLOOR_HEIGHT 32
+#define SCREEN_WIDTH 160
+#define SCREEN_HEIGHT 120
 
 static void renderbg(SDL_Renderer *renderer) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -24,17 +23,18 @@ int main(void) {
 		return 1;
 	}
 
-	SDL_Window *window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window *window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 	if (!window) {
 		fprintf(stderr, "Window could not be created! Error: %s\n", SDL_GetError());
 		return 1;
 	}
 
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
 		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
 		return 1;
 	}
+	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	SDL_Event e;
 	Rocket *r = Rocket_create(renderer);

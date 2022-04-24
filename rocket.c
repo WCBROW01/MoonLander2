@@ -4,10 +4,8 @@
 
 #define ROCKET_WIDTH 9
 #define ROCKET_HEIGHT 14
-#define SIZE_MOD 4
-#define FLOOR_HEIGHT 32
-#define ACCEL 98.0
-#define TICKRATE 60
+#define ACCEL 24.5
+#define TICKRATE 250
 #define ACCEL_PER_TICK (ACCEL / TICKRATE)
 #define MS_PER_TICK (1000 / TICKRATE)
 #define ANIM_RATE 15
@@ -40,6 +38,10 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 
 Rocket *Rocket_create(SDL_Renderer *renderer) {
 	SDL_Surface *sheet_data = SDL_LoadBMP("rocket.bmp");
+	if (!sheet_data) {
+		fprintf(stderr, "Failed to load rocket sprite! Error: %s\n", SDL_GetError());
+		exit(1);
+	}
 
 	Rocket *ret = malloc(sizeof(Rocket));
 	Rocket r = {
@@ -50,7 +52,7 @@ Rocket *Rocket_create(SDL_Renderer *renderer) {
 			{ROCKET_WIDTH, 0, ROCKET_WIDTH, ROCKET_HEIGHT},
 			{0, ROCKET_HEIGHT, ROCKET_WIDTH, ROCKET_HEIGHT}
 		},
-		.pos = 200,
+		.pos = 100,
 		.velocity = 0,
 		.state = 0
 	};
@@ -67,7 +69,7 @@ void Rocket_destroy(Rocket *r) {
 }
 
 void Rocket_reset(Rocket *r) {
-	r->pos = 200;
+	r->pos = 100;
 	r->velocity = 0;
 	r->state = 0;
 	r->anim_frame = 0;
@@ -76,13 +78,13 @@ void Rocket_reset(Rocket *r) {
 
 void Rocket_render(Rocket *r) {
 	int s_width, s_height;
-	SDL_GetRendererOutputSize(r->renderer, &s_width, &s_height);
+	SDL_RenderGetLogicalSize(r->renderer, &s_width, &s_height);
 
 	SDL_Rect rocket_rect = {
-		.x = s_width / 2 - ROCKET_WIDTH * SIZE_MOD / 2,
-		.y = s_height - FLOOR_HEIGHT - ROCKET_HEIGHT * SIZE_MOD + 2 * SIZE_MOD - r->pos,
-		.w = ROCKET_WIDTH * SIZE_MOD,
-		.h = ROCKET_HEIGHT * SIZE_MOD
+		.x = s_width / 2 - ROCKET_WIDTH/ 2,
+		.y = s_height - FLOOR_HEIGHT - ROCKET_HEIGHT + 2 - r->pos,
+		.w = ROCKET_WIDTH,
+		.h = ROCKET_HEIGHT
 	};
 
 	SDL_RenderCopy(r->renderer, r->sprite_sheet, &r->sprite_clips[r->state + r->anim_frame], &rocket_rect);

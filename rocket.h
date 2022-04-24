@@ -1,6 +1,11 @@
 #ifndef MOONLANDER_ROCKET_H
 #define MOONLANDER_ROCKET_H
 
+/* arbitrary floor is super temporary,
+ * this will be useless if I make anything more advanced.
+ * I'll also have to redo the drawing code, but I need to do so anyways. */
+#define FLOOR_HEIGHT 8
+
 typedef struct {
 	SDL_Renderer *renderer;
 	SDL_Texture *sprite_sheet;
