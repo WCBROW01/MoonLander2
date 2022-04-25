@@ -54,10 +54,10 @@ Rocket *Rocket_create(SDL_Renderer *renderer) {
 		}
 	};
 
-	Rocket_reset(ret);
 	SDL_FreeSurface(sheet_data);
 
 	*ret = r;
+	Rocket_reset(ret);
 	r.timer = SDL_AddTimer(MS_PER_TICK, Rocket_physics, ret);
 	return ret;
 }
