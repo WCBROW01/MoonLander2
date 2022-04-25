@@ -36,10 +36,43 @@ int main(void) {
 	}
 	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+
+
+
+
+
+
 	SDL_Event e;
+	bool quit = false;
+	// load bitmap from argv[1]
+	SDL_Surface *loaded_bmp = SDL_LoadBMP("moonL2.bmp");
+
+
+	SDL_Texture *bmp_texture = SDL_CreateTextureFromSurface(renderer, loaded_bmp);
+	SDL_FreeSurface(loaded_bmp);
+
+	bool title = false;
+
+	while (!quit && !title){
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) quit = true;
+			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				quit = true;
+				break;
+			case SDLK_RETURN:
+				title = true;
+				break;
+			}
+				SDL_RenderClear(renderer);
+				SDL_RenderCopy(renderer, bmp_texture, NULL, NULL);
+				SDL_RenderPresent(renderer);
+	}
+}
+	SDL_DestroyTexture(bmp_texture);
+
 	Rocket *r = Rocket_create(renderer);
 
-	bool quit = false;
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
