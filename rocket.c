@@ -25,6 +25,7 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 	r->angle -= r->turning * 0.01;
 
 	if (r->state) {
+		// if the fast flag is active (left shift being held) multiply accel by 3
 		r->vel_fuel_x += (r->fast * 2 + 1) * ACCEL / TICKRATE * cosf(r->angle);
 		r->vel_fuel_y += (r->fast * 2 + 1) * ACCEL / TICKRATE * sinf(r->angle);
 		++r->anim_timer;
@@ -86,6 +87,7 @@ Rocket *Rocket_create(SDL_Renderer *renderer) {
 }
 
 void Rocket_destroy(Rocket *r) {
+	SDL_RemoveTimer(r->timer);
 	SDL_DestroyTexture(r->sprite_sheet);
 	free(r);
 }

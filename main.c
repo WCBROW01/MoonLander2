@@ -8,6 +8,15 @@
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 120
 
+static void render_screen(SDL_Renderer *renderer, SDL_Texture *texture) {
+	SDL_SetRenderTarget(renderer, NULL);
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderPresent(renderer);
+	SDL_SetRenderTarget(renderer, texture);
+}
+
 static void renderbg(SDL_Renderer *renderer) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_Rect floor = {0, SCREEN_HEIGHT - FLOOR_HEIGHT, SCREEN_WIDTH, FLOOR_HEIGHT};
@@ -23,7 +32,7 @@ int main(void) {
 		return 1;
 	}
 
-	SDL_Window *window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+	SDL_Window *window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	if (!window) {
 		fprintf(stderr, "Window could not be created! Error: %s\n", SDL_GetError());
 		return 1;
@@ -34,7 +43,8 @@ int main(void) {
 		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
 		return 1;
 	}
-	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+	//SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SDL_Texture *render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// Load title screen bitmap
 	SDL_Surface *title_bmp = SDL_LoadBMP("moonL2.bmp");
@@ -56,11 +66,13 @@ int main(void) {
 				title = true;
 				break;
 			}
-
-			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, title_texture, NULL, NULL);
-			SDL_RenderPresent(renderer);
 		}
+
+		SDL_SetRenderTarget(renderer, render_texture);
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, title_texture, NULL, NULL);
+
+		render_screen(renderer, render_texture);
 	}
 
 	SDL_DestroyTexture(title_texture);
@@ -105,13 +117,16 @@ int main(void) {
 			}
 		}
 
+		SDL_SetRenderTarget(renderer, render_texture);
 		SDL_RenderClear(renderer);
 		renderbg(renderer);
 		Rocket_render(r);
-		SDL_RenderPresent(renderer);
+
+		render_screen(renderer, render_texture);
 	}
 
 	Rocket_destroy(r);
+	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
