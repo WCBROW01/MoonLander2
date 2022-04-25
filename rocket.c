@@ -8,8 +8,8 @@
 #define ROCKET_HEIGHT 14
 #define ACCEL 50.0
 #define TICKRATE 250
-#define ACCEL_PER_TICK (ACCEL / TICKRATE)
 #define MS_PER_TICK (1000 / TICKRATE)
+#define GRAVITY 16.2
 #define ANIM_RATE 15
 #define ANIM_TIME (TICKRATE / ANIM_RATE)
 #define NUM_FRAMES 2
@@ -25,10 +25,9 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 		r->angle -= 0.01;
 	}
 
-	r->vel_y -= 16.2f / TICKRATE;
 	if (r->state) {
-		r->vel_x += ACCEL_PER_TICK * cos(r->angle);
-		r->vel_y += ACCEL_PER_TICK * sin(r->angle);
+		r->vel_fuel_x += ACCEL / TICKRATE * cos(r->angle);
+		r->vel_fuel_y += ACCEL / TICKRATE * sin(r->angle);
 		++r->anim_timer;
 		if (r->anim_timer == ANIM_TIME) {
 			++r->anim_frame;
@@ -36,15 +35,30 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 			r->anim_timer = 0;
 		}
 	} else {
-		if (r->vel_x > 1 || r->vel_x < -1)
-			r->vel_x -= ACCEL_PER_TICK / 2 * cos(r->angle);
-		else r->vel_x = 0;
+		if (r->vel_fuel_x > 1 || r->vel_fuel_x < -1)
+			r->vel_fuel_x -= ACCEL / TICKRATE / 2 * cos(r->angle);
+		else r->vel_fuel_x = 0;
+
+		if (r->vel_fuel_y > 1 || r->vel_fuel_y < -1)
+			r->vel_fuel_y -= ACCEL / TICKRATE / 2 * sin(r->angle);
+		else r->vel_fuel_y = 0;
 		r->anim_frame = 0;
 	}
 
-	if (r->pos_y > 0.0) {
+	if (r->pos_y < 0.0) {
+		r->pos_y = 0.0;
+	} else if (r->pos_y > 0.0 || r->state) {
+		r->vel_grav -= GRAVITY / TICKRATE;
+		r->vel_x = r->vel_fuel_x;
+		r->vel_y = r->vel_fuel_y + r->vel_grav;
 		r->pos_x += r->vel_x / TICKRATE;
 		r->pos_y += r->vel_y / TICKRATE;
+	} else {
+		r->vel_fuel_x = 0.0;
+		r->vel_fuel_y = 0.0;
+		r->vel_grav = 0.0;
+		r->vel_x = 0.0;
+		r->vel_y = 0.0;
 	}
 
 	return interval;
@@ -84,8 +98,11 @@ void Rocket_destroy(Rocket *r) {
 void Rocket_reset(Rocket *r) {
 	r->pos_x = 80;
 	r->pos_y = 100;
-	r->vel_x = 0;
-	r->vel_y = 0;
+	r->vel_x = 0.0;
+	r->vel_y = 0.0;
+	r->vel_fuel_x = 0.0;
+	r->vel_fuel_y = 0.0;
+	r->vel_grav = 0.0;
 	r->angle = M_PI / 2;
 	r->state = 0;
 	r->turning = 0;
