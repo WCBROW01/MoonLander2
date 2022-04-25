@@ -13,8 +13,7 @@ typedef struct {
 	SDL_TimerID timer;
 	float pos, velocity;
 	int anim_frame, anim_timer;
-	int state;
-
+	int state, turning;
 } Rocket;
 
 Rocket *Rocket_create(SDL_Renderer *renderer);

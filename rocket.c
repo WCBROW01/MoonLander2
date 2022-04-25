@@ -51,11 +51,10 @@ Rocket *Rocket_create(SDL_Renderer *renderer) {
 			{0, 0, ROCKET_WIDTH, ROCKET_HEIGHT},
 			{ROCKET_WIDTH, 0, ROCKET_WIDTH, ROCKET_HEIGHT},
 			{0, ROCKET_HEIGHT, ROCKET_WIDTH, ROCKET_HEIGHT}
-		},
-		.pos = 100,
-		.velocity = 0,
-		.state = 0
+		}
 	};
+
+	Rocket_reset(ret);
 	SDL_FreeSurface(sheet_data);
 
 	*ret = r;
@@ -72,6 +71,7 @@ void Rocket_reset(Rocket *r) {
 	r->pos = 100;
 	r->velocity = 0;
 	r->state = 0;
+	r->turning = 0;
 	r->anim_frame = 0;
 	r->anim_timer = 0;
 }

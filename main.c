@@ -43,19 +43,31 @@ int main(void) {
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
-			else if (e.type == SDL_KEYDOWN) switch (e.key.keysym.sym) {
+			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_ESCAPE:
 				quit = true;
 				break;
 			case SDLK_SPACE:
 				r->state = 1;
 				break;
+			case SDLK_LEFT:
+				--r->turning;
+				break;
+			case SDLK_RIGHT:
+				++r->turning;
+				break;
 			case SDLK_r:
 				Rocket_reset(r);
 				break;
-			} else if (e.type == SDL_KEYUP) switch (e.key.keysym.sym) {
+			} else if (e.type == SDL_KEYUP && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_SPACE:
 				r->state = 0;
+				break;
+			case SDLK_LEFT:
+				++r->turning;
+				break;
+			case SDLK_RIGHT:
+				--r->turning;
 				break;
 			}
 		}
