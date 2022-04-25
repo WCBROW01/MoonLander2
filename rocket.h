@@ -11,7 +11,7 @@ typedef struct {
 	SDL_Texture *sprite_sheet;
 	SDL_Rect sprite_clips[3];
 	SDL_TimerID timer;
-	float pos, velocity;
+	float pos_x, pos_y, vel_x, vel_y, angle;
 	int anim_frame, anim_timer;
 	int state, turning;
 } Rocket;

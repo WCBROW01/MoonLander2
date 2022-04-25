@@ -1,10 +1,12 @@
+#include <math.h>
+
 #include <SDL2/SDL.h>
 
 #include "rocket.h"
 
 #define ROCKET_WIDTH 9
 #define ROCKET_HEIGHT 14
-#define ACCEL 24.5
+#define ACCEL 50.0
 #define TICKRATE 250
 #define ACCEL_PER_TICK (ACCEL / TICKRATE)
 #define MS_PER_TICK (1000 / TICKRATE)
@@ -12,12 +14,21 @@
 #define ANIM_TIME (TICKRATE / ANIM_RATE)
 #define NUM_FRAMES 2
 
+#define RTOD(x) ((x) * 180 / M_PI)
 
 Uint32 Rocket_physics(Uint32 interval, void *param) {
 	Rocket *r = (Rocket*) param;
 
+	if (r->turning == -1) {
+		r->angle += 0.01;
+	} else if (r->turning == 1) {
+		r->angle -= 0.01;
+	}
+
+	r->vel_y -= 16.2f / TICKRATE;
 	if (r->state) {
-		r->velocity += ACCEL_PER_TICK;
+		r->vel_x += ACCEL_PER_TICK * cos(r->angle);
+		r->vel_y += ACCEL_PER_TICK * sin(r->angle);
 		++r->anim_timer;
 		if (r->anim_timer == ANIM_TIME) {
 			++r->anim_frame;
@@ -25,12 +36,15 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 			r->anim_timer = 0;
 		}
 	} else {
-		r->velocity -= ACCEL_PER_TICK;
+		if (r->vel_x > 1 || r->vel_x < -1)
+			r->vel_x -= ACCEL_PER_TICK / 2 * cos(r->angle);
+		else r->vel_x = 0;
 		r->anim_frame = 0;
 	}
 
-	if (r->pos > 0.0) {
-		r->pos += r->velocity / TICKRATE;
+	if (r->pos_y > 0.0) {
+		r->pos_x += r->vel_x / TICKRATE;
+		r->pos_y += r->vel_y / TICKRATE;
 	}
 
 	return interval;
@@ -68,8 +82,11 @@ void Rocket_destroy(Rocket *r) {
 }
 
 void Rocket_reset(Rocket *r) {
-	r->pos = 100;
-	r->velocity = 0;
+	r->pos_x = 80;
+	r->pos_y = 100;
+	r->vel_x = 0;
+	r->vel_y = 0;
+	r->angle = M_PI / 2;
 	r->state = 0;
 	r->turning = 0;
 	r->anim_frame = 0;
@@ -81,11 +98,13 @@ void Rocket_render(Rocket *r) {
 	SDL_RenderGetLogicalSize(r->renderer, &s_width, &s_height);
 
 	SDL_Rect rocket_rect = {
-		.x = s_width / 2 - ROCKET_WIDTH/ 2,
-		.y = s_height - FLOOR_HEIGHT - ROCKET_HEIGHT + 2 - r->pos,
+		.x = r->pos_x - ROCKET_WIDTH / 2,
+		.y = s_height - FLOOR_HEIGHT - ROCKET_HEIGHT + 2 - r->pos_y,
 		.w = ROCKET_WIDTH,
 		.h = ROCKET_HEIGHT
 	};
 
-	SDL_RenderCopy(r->renderer, r->sprite_sheet, &r->sprite_clips[r->state + r->anim_frame], &rocket_rect);
+	const SDL_Point ROCKET_CENTER = {5, 7};
+
+	SDL_RenderCopyEx(r->renderer, r->sprite_sheet, &r->sprite_clips[r->state + r->anim_frame], &rocket_rect, RTOD(-r->angle) + 90, &ROCKET_CENTER, SDL_FLIP_NONE);
 }
