@@ -77,6 +77,9 @@ int main(void) {
 			case SDLK_SPACE:
 				r->state = 1;
 				break;
+			case SDLK_LSHIFT:
+				r->fast = 1;
+				break;
 			case SDLK_LEFT:
 				--r->turning;
 				break;
@@ -89,6 +92,9 @@ int main(void) {
 			} else if (e.type == SDL_KEYUP && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_SPACE:
 				r->state = 0;
+				break;
+			case SDLK_LSHIFT:
+				r->fast = 0;
 				break;
 			case SDLK_LEFT:
 				++r->turning;
