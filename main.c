@@ -58,12 +58,12 @@ int main(void) {
 			}
 
 			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, title_bmp, NULL, NULL);
+			SDL_RenderCopy(renderer, title_texture, NULL, NULL);
 			SDL_RenderPresent(renderer);
 		}
 	}
 
-	SDL_DestroyTexture(bmp_texture);
+	SDL_DestroyTexture(title_texture);
 
 	// Actual game
 	Rocket *r = Rocket_create(renderer);
