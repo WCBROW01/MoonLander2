@@ -36,23 +36,15 @@ int main(void) {
 	}
 	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	// Load title screen bitmap
+	SDL_Surface *title_bmp = SDL_LoadBMP("moonL2.bmp");
+	SDL_Texture *title_texture = SDL_CreateTextureFromSurface(renderer, title_bmp);
+	SDL_FreeSurface(title_bmp);
 
-
-
-
-
-
+	// Title screen
 	SDL_Event e;
 	bool quit = false;
-	// load bitmap from argv[1]
-	SDL_Surface *loaded_bmp = SDL_LoadBMP("moonL2.bmp");
-
-
-	SDL_Texture *bmp_texture = SDL_CreateTextureFromSurface(renderer, loaded_bmp);
-	SDL_FreeSurface(loaded_bmp);
-
 	bool title = false;
-
 	while (!quit && !title){
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
@@ -64,15 +56,17 @@ int main(void) {
 				title = true;
 				break;
 			}
-				SDL_RenderClear(renderer);
-				SDL_RenderCopy(renderer, bmp_texture, NULL, NULL);
-				SDL_RenderPresent(renderer);
+
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, title_bmp, NULL, NULL);
+			SDL_RenderPresent(renderer);
+		}
 	}
-}
+
 	SDL_DestroyTexture(bmp_texture);
 
+	// Actual game
 	Rocket *r = Rocket_create(renderer);
-
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
