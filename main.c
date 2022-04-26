@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "rocket.h"
+#include "lander.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -78,7 +78,7 @@ int main(void) {
 	SDL_DestroyTexture(title_texture);
 
 	// Actual game
-	Rocket *r = Rocket_create(renderer);
+	Lander *l = Lander_create(renderer);
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
@@ -87,32 +87,32 @@ int main(void) {
 				quit = true;
 				break;
 			case SDLK_SPACE:
-				r->state = 1;
+				l->state = 1;
 				break;
 			case SDLK_LSHIFT:
-				r->fast = 1;
+				l->fast = 1;
 				break;
 			case SDLK_LEFT:
-				--r->turning;
+				--l->turning;
 				break;
 			case SDLK_RIGHT:
-				++r->turning;
+				++l->turning;
 				break;
 			case SDLK_r:
-				Rocket_reset(r);
+				Lander_reset(l);
 				break;
 			} else if (e.type == SDL_KEYUP && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_SPACE:
-				r->state = 0;
+				l->state = 0;
 				break;
 			case SDLK_LSHIFT:
-				r->fast = 0;
+				l->fast = 0;
 				break;
 			case SDLK_LEFT:
-				++r->turning;
+				++l->turning;
 				break;
 			case SDLK_RIGHT:
-				--r->turning;
+				--l->turning;
 				break;
 			}
 		}
@@ -120,12 +120,12 @@ int main(void) {
 		SDL_SetRenderTarget(renderer, render_texture);
 		SDL_RenderClear(renderer);
 		renderbg(renderer);
-		Rocket_render(r);
+		Lander_render(l);
 
 		render_screen(renderer, render_texture);
 	}
 
-	Rocket_destroy(r);
+	Lander_destroy(l);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
