@@ -6,8 +6,8 @@
 
 #include "rocket.h"
 
-#define ROCKET_WIDTH 9
-#define ROCKET_HEIGHT 14
+#define ROCKET_WIDTH 16
+#define ROCKET_HEIGHT 16
 #define ACCEL 50.0
 #define TICKRATE 250
 #define MS_PER_TICK (1000 / TICKRATE)
@@ -62,7 +62,7 @@ Uint32 Rocket_physics(Uint32 interval, void *param) {
 }
 
 Rocket *Rocket_create(SDL_Renderer *renderer) {
-	SDL_Surface *sheet_data = SDL_LoadBMP("rocket.bmp");
+	SDL_Surface *sheet_data = SDL_LoadBMP("LunarModule Sprites/LunarModule.bmp");
 	if (!sheet_data) {
 		fprintf(stderr, "Failed to load rocket sprite! Error: %s\n", SDL_GetError());
 		exit(1);
@@ -119,7 +119,7 @@ void Rocket_render(Rocket *r) {
 		.h = ROCKET_HEIGHT
 	};
 
-	const SDL_Point ROCKET_CENTER = {5, 7};
+
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.
 	 * RenderCopyEx takes an angle in degrees and rotates clockwise,
@@ -129,6 +129,6 @@ void Rocket_render(Rocket *r) {
 	SDL_RenderCopyEx(
 		r->renderer, r->sprite_sheet,
 		&r->sprite_clips[r->state + r->anim_frame], &rocket_rect,
-		RTOD(-r->angle) + 90, &ROCKET_CENTER, SDL_FLIP_NONE
+		RTOD(-r->angle) + 90, NULL, SDL_FLIP_NONE
 	);
 }

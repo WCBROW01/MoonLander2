@@ -5,8 +5,8 @@
 
 #include "rocket.h"
 
-#define SCREEN_WIDTH 160
-#define SCREEN_HEIGHT 120
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
 static void render_screen(SDL_Renderer *renderer, SDL_Texture *texture) {
 	SDL_SetRenderTarget(renderer, NULL);
