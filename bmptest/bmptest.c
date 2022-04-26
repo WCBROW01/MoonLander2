@@ -4,10 +4,10 @@
 #include <SDL2/SDL.h>
 
 int main(int argc, char **argv) {
-	if (argc < 2) {
-		fprintf(stderr, "Please provide a BMP file to display.\n");
-		return 0;
-	}
+	char *path;
+
+	if (argc < 2) path = "moonL2.bmp";
+	else path = argv[1];
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL failed to initialize! Error: %s\n", SDL_GetError());
@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
 	}
 
 	// load bitmap from argv[1]
-	SDL_Surface *loaded_bmp = SDL_LoadBMP(argv[1]);
+	SDL_Surface *loaded_bmp = SDL_LoadBMP(path);
 	if (!loaded_bmp) {
-		 printf("Unable to load image %s! Error: %s\n", argv[1], SDL_GetError());
+		printf("Unable to load image %s! Error: %s\n", path, SDL_GetError());
 	}
 
 	SDL_Texture *bmp_texture = SDL_CreateTextureFromSurface(renderer, loaded_bmp);

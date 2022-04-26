@@ -17,6 +17,24 @@ static void render_screen(SDL_Renderer *renderer, SDL_Texture *texture) {
 	SDL_SetRenderTarget(renderer, texture);
 }
 
+static void render_title(SDL_Renderer *renderer, SDL_Texture *title) {
+	int w, h;
+	SDL_QueryTexture(title, NULL, NULL, &w, &h);
+	w *= 4;
+	h *= 4;
+	SDL_Rect title_rect = {SCREEN_WIDTH / 2 - w / 2, SCREEN_HEIGHT / 3 - h / 2, w, h};
+
+	SDL_Rect outline[4];
+	for (int i = 0; i < 4; ++i)
+		outline[i] = (SDL_Rect) {i, i, SCREEN_WIDTH - 2 * i, SCREEN_HEIGHT - 2 * i};
+
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, 0x9C, 0x9C, 0x9C, 0xFF);
+	SDL_RenderDrawRects(renderer, outline, 4);
+	SDL_RenderCopy(renderer, title, NULL, &title_rect);
+}
+
 static void renderbg(SDL_Renderer *renderer) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_Rect floor = {0, SCREEN_HEIGHT - FLOOR_HEIGHT, SCREEN_WIDTH, FLOOR_HEIGHT};
@@ -69,9 +87,12 @@ int main(void) {
 		}
 
 		SDL_SetRenderTarget(renderer, render_texture);
+		/*
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, title_texture, NULL, NULL);
+		*/
 
+		render_title(renderer, title_texture);
 		render_screen(renderer, render_texture);
 	}
 

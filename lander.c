@@ -26,8 +26,8 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 
 	if (l->state) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
-		l->vel_fuel_x += (l->fast * 2 + 1) * ACCEL / TICKRATE * cosf(l->angle);
-		l->vel_fuel_y += (l->fast * 2 + 1) * ACCEL / TICKRATE * sinf(l->angle);
+		l->vel_fuel_x += (l->fast * 1.25 + 1) * ACCEL / TICKRATE * cosf(l->angle);
+		l->vel_fuel_y += (l->fast * 1.25 + 1) * ACCEL / TICKRATE * sinf(l->angle);
 		++l->anim_timer;
 		if (l->anim_timer == ANIM_TIME) {
 			++l->anim_frame;
