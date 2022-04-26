@@ -47,7 +47,7 @@ int main(void) {
 	SDL_Texture *render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// Load title screen bitmap
-	SDL_Surface *title_bmp = SDL_LoadBMP("moonL2.bmp");
+	SDL_Surface *title_bmp = SDL_LoadBMP("ML_title.bmp");
 	SDL_Texture *title_texture = SDL_CreateTextureFromSurface(renderer, title_bmp);
 	SDL_FreeSurface(title_bmp);
 
