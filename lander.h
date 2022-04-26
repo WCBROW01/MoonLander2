@@ -1,3 +1,9 @@
+/*
+ * Header for the Lander object.
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #ifndef MOONLANDER_LANDER_H
 #define MOONLANDER_LANDER_H
 

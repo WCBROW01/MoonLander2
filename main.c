@@ -1,3 +1,9 @@
+/*
+ * Entrypoint for the game.
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -61,7 +67,8 @@ int main(void) {
 		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
 		return 1;
 	}
-	//SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	// This texture will be used as a buffer for rendering,
 	SDL_Texture *render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// Load title screen bitmap
@@ -87,11 +94,6 @@ int main(void) {
 		}
 
 		SDL_SetRenderTarget(renderer, render_texture);
-		/*
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, title_texture, NULL, NULL);
-		*/
-
 		render_title(renderer, title_texture);
 		render_screen(renderer, render_texture);
 	}

@@ -1,3 +1,9 @@
+/*
+ * Source code for the Lander object.
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
@@ -22,7 +28,7 @@
 Uint32 Lander_physics(Uint32 interval, void *param) {
 	Lander *l = (Lander*) param;
 
-	l->angle -= l->turning * 0.01;
+	l->angle -= l->turning * 0.01f;
 
 	if (l->state) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
@@ -42,21 +48,17 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	}
 
 	// If the lander has landed, reset velocity and y position to zero.
-	if (l->pos_y < 0.0) {
-		l->pos_y = 0.0;
-	} else if (l->pos_y > 0.0 || l->state) {
-		l->vel_grav -= GRAVITY / TICKRATE;
-		l->vel_x = l->vel_fuel_x;
-		l->vel_y = l->vel_fuel_y + l->vel_grav;
-		l->pos_x += l->vel_x / TICKRATE;
-		l->pos_y += l->vel_y / TICKRATE;
-	} else {
-		l->vel_fuel_x = 0.0;
-		l->vel_fuel_y = 0.0;
-		l->vel_grav = 0.0;
-		l->vel_x = 0.0;
-		l->vel_y = 0.0;
+	if (l->pos_y <= 0.0) {
+		if (l->vel_fuel_y < 0.1f && l->vel_fuel_y > -0.1f) l->vel_fuel_y = 0.0f;
+		l->pos_y = 0.0f;
+		l->vel_grav = 0.0f;
 	}
+
+	l->vel_grav -= GRAVITY / TICKRATE;
+	l->vel_x = l->vel_fuel_x;
+	l->vel_y = l->vel_fuel_y + l->vel_grav;
+	l->pos_x += l->vel_x / TICKRATE;
+	l->pos_y += l->vel_y / TICKRATE;
 
 	return interval;
 }
@@ -96,11 +98,11 @@ void Lander_destroy(Lander *l) {
 void Lander_reset(Lander *l) {
 	l->pos_x = 80;
 	l->pos_y = 100;
-	l->vel_x = 0.0;
-	l->vel_y = 0.0;
-	l->vel_fuel_x = 0.0;
-	l->vel_fuel_y = 0.0;
-	l->vel_grav = 0.0;
+	l->vel_x = 0.0f;
+	l->vel_y = 0.0f;
+	l->vel_fuel_x = 0.0f;
+	l->vel_fuel_y = 0.0f;
+	l->vel_grav = 0.0f;
 	l->angle = M_PI / 2;
 	l->state = 0;
 	l->fast = 0;
