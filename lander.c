@@ -14,7 +14,7 @@
 #define GRAVITY 16.2
 #define ANIM_RATE 15
 #define ANIM_TIME (TICKRATE / ANIM_RATE)
-#define NUM_FRAMES 2
+#define NUM_FRAMES 3
 
 #define RTOD(x) ((x) * 180 / M_PI)
 #define CMP_ZERO(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
@@ -75,7 +75,8 @@ Lander *Lander_create(SDL_Renderer *renderer) {
 		.sprite_clips = {
 			{0, 0, LANDER_WIDTH, LANDER_HEIGHT},
 			{LANDER_WIDTH, 0, LANDER_WIDTH, LANDER_HEIGHT},
-			{0, LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT}
+			{0, LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT},
+			{LANDER_WIDTH, LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT}
 		}
 	};
 
