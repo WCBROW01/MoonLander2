@@ -22,8 +22,9 @@ typedef struct {
 	float pos_x, pos_y, vel_x, vel_y, angle;
 	float vel_grav, vel_fuel_x, vel_fuel_y;
 	char anim_frame, anim_timer;
-	bool state, fast;
 	char turning;
+	bool state : 1;
+	bool fast : 1;
 } Lander;
 
 Lander *Lander_create(SDL_Renderer *renderer);
