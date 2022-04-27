@@ -14,10 +14,10 @@
 
 #define LANDER_WIDTH 16
 #define LANDER_HEIGHT 13
-#define ACCEL 50.0
+#define ACCEL 50.0f
 #define TICKRATE 250
 #define MS_PER_TICK (1000 / TICKRATE)
-#define GRAVITY 16.2
+#define GRAVITY 16.2f
 #define ANIM_RATE 15
 #define ANIM_TIME (TICKRATE / ANIM_RATE)
 #define NUM_FRAMES 3
@@ -32,8 +32,8 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 
 	if (l->state) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
-		l->vel_fuel_x += (l->fast * 1.25 + 1) * ACCEL / TICKRATE * cosf(l->angle);
-		l->vel_fuel_y += (l->fast * 1.25 + 1) * ACCEL / TICKRATE * sinf(l->angle);
+		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * cosf(l->angle);
+		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * sinf(l->angle);
 		++l->anim_timer;
 		if (l->anim_timer == ANIM_TIME) {
 			++l->anim_frame;
@@ -104,9 +104,6 @@ void Lander_reset(Lander *l) {
 	l->vel_fuel_y = 0.0f;
 	l->vel_grav = 0.0f;
 	l->angle = M_PI / 2;
-	l->state = 0;
-	l->fast = 0;
-	l->turning = 0;
 	l->anim_frame = 0;
 	l->anim_timer = 0;
 }
