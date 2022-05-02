@@ -17,7 +17,6 @@
 typedef struct {
 	SDL_Renderer *renderer;
 	SDL_Texture *sprite_sheet;
-	SDL_Rect sprite_clips[4];
 	SDL_TimerID timer;
 	float pos_x, pos_y, vel_x, vel_y, angle;
 	float vel_grav, vel_fuel_x, vel_fuel_y;

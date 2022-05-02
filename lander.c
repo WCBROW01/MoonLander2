@@ -73,13 +73,7 @@ Lander *Lander_create(SDL_Renderer *renderer) {
 	Lander *l = malloc(sizeof(Lander));
 	*l = (Lander) {
 		.renderer = renderer,
-		.sprite_sheet = SDL_CreateTextureFromSurface(renderer, sheet_data),
-		.sprite_clips = {
-			{0, 0, LANDER_WIDTH, LANDER_HEIGHT},
-			{LANDER_WIDTH, 0, LANDER_WIDTH, LANDER_HEIGHT},
-			{0, LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT},
-			{LANDER_WIDTH, LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT}
-		}
+		.sprite_sheet = SDL_CreateTextureFromSurface(renderer, sheet_data)
 	};
 
 	SDL_FreeSurface(sheet_data);
@@ -118,8 +112,8 @@ void Lander_render(Lander *l) {
 		.w = LANDER_WIDTH,
 		.h = LANDER_HEIGHT
 	};
-
-
+	
+	SDL_Rect sprite = {l->state * (l->anim_frame + 1) * LANDER_WIDTH, l->fast * LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT};
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.
 	 * RenderCopyEx takes an angle in degrees and rotates clockwise,
@@ -128,7 +122,7 @@ void Lander_render(Lander *l) {
 	 * so 90 degrees are added to the rotation. This will be fixed with the new sprite. */
 	SDL_RenderCopyEx(
 		l->renderer, l->sprite_sheet,
-		&l->sprite_clips[l->state + l->anim_frame], &lander_rect,
+		&sprite, &lander_rect,
 		RTOD(-l->angle) + 90, NULL, SDL_FLIP_NONE
 	);
 }
