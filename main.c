@@ -1,6 +1,7 @@
 /*
  * Entrypoint for the game.
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
+ * Contributors: Will Brown, Jerrin Redmon
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 

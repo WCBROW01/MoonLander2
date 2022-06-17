@@ -1,5 +1,6 @@
 /*
  * Header for the Lander object.
+ * Contributors: Will Brown
  * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
  * See LICENSE or <https://www.gnu.org/licenses/>
  */

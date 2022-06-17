@@ -1,5 +1,6 @@
 /*
  * Source code for the Lander object.
+ * Contributors: Will Brown, Jerrin Redmon
  * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
@@ -97,7 +98,7 @@ void Lander_reset(Lander *l) {
 	l->vel_fuel_x = 0.0f;
 	l->vel_fuel_y = 0.0f;
 	l->vel_grav = 0.0f;
-	l->angle = M_PI / 2;
+	l->angle = M_PI_2;
 	l->anim_frame = 0;
 	l->anim_timer = 0;
 }
