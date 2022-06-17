@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
@@ -14,16 +15,53 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
-static void render_screen(SDL_Renderer *renderer, SDL_Texture *texture) {
+// Game state, may end up in a struct at some point.
+static SDL_Window *window;
+static SDL_Renderer *renderer;
+static SDL_Texture *render_texture;
+
+static void init_game(void) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
+		fprintf(stderr, "SDL failed to initialize! Error: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
+	if (!window) {
+		fprintf(stderr, "Window could not be created! Error: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+	if (!renderer) {
+		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	// This texture will be used as a buffer for rendering,
+	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+}
+
+/* This function frees all game memory and exits the program,
+ * so it will never return. */
+void exit_game(void) {
+	SDL_DestroyTexture(render_texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+	exit(0);
+}
+
+static void render_screen(void) {
 	SDL_SetRenderTarget(renderer, NULL);
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderCopy(renderer, render_texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
-	SDL_SetRenderTarget(renderer, texture);
+	SDL_SetRenderTarget(renderer, render_texture);
 }
 
-static void render_title(SDL_Renderer *renderer, SDL_Texture *title) {
+static void render_title(SDL_Texture *title) {
 	int w, h;
 	SDL_QueryTexture(title, NULL, NULL, &w, &h);
 	w *= 4;
@@ -41,7 +79,7 @@ static void render_title(SDL_Renderer *renderer, SDL_Texture *title) {
 	SDL_RenderCopy(renderer, title, NULL, &title_rect);
 }
 
-static void renderbg(SDL_Renderer *renderer) {
+static void renderbg(void) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_Rect floor = {0, SCREEN_HEIGHT - FLOOR_HEIGHT, SCREEN_WIDTH, FLOOR_HEIGHT};
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
@@ -50,27 +88,7 @@ static void renderbg(SDL_Renderer *renderer) {
 	SDL_RenderFillRect(renderer, &floor);
 }
 
-int main(void) {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
-		fprintf(stderr, "SDL failed to initialize! Error: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	SDL_Window *window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
-	if (!window) {
-		fprintf(stderr, "Window could not be created! Error: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-	if (!renderer) {
-		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	// This texture will be used as a buffer for rendering,
-	SDL_Texture *render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-
+static void title_screen(void) {
 	// Load title screen bitmap
 	SDL_Surface *title_bmp = SDL_LoadBMP("ML_title.bmp");
 	SDL_Texture *title_texture = SDL_CreateTextureFromSurface(renderer, title_bmp);
@@ -94,14 +112,18 @@ int main(void) {
 		}
 
 		SDL_SetRenderTarget(renderer, render_texture);
-		render_title(renderer, title_texture);
-		render_screen(renderer, render_texture);
+		render_title(title_texture);
+		render_screen();
 	}
 
 	SDL_DestroyTexture(title_texture);
+	if (quit) exit_game();
+}
 
-	// Actual game
+static void game_loop(void) {
 	Lander *l = Lander_create(renderer);
+	SDL_Event e;
+	bool quit = false;
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
@@ -142,16 +164,19 @@ int main(void) {
 
 		SDL_SetRenderTarget(renderer, render_texture);
 		SDL_RenderClear(renderer);
-		renderbg(renderer);
+		renderbg();
 		Lander_render(l);
 
-		render_screen(renderer, render_texture);
+		render_screen();
 	}
 
+	// free lander once loop finishes
 	Lander_destroy(l);
-	SDL_DestroyTexture(render_texture);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-	return 0;
+}
+
+int main(void) {
+	init_game();
+	title_screen();
+	game_loop();
+	exit_game();
 }
