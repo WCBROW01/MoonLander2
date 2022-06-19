@@ -10,6 +10,7 @@
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "lander.h"
 
@@ -20,32 +21,41 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
+static TTF_Font *font;
 
 static void init_game(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
-		fprintf(stderr, "SDL failed to initialize! Error: %s\n", SDL_GetError());
+		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
 	if (!window) {
-		fprintf(stderr, "Window could not be created! Error: %s\n", SDL_GetError());
+		fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (!renderer) {
-		fprintf(stderr, "Renderer could not be created! Error: %s\n", SDL_GetError());
+		fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
 		exit(1);
 	}
 
+	if (TTF_Init() < 0) {
+		fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
+		exit(1);
+	}
 	// This texture will be used as a buffer for rendering,
 	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	font = TTF_OpenFont("PublicPixel.ttf", 8);
 }
 
 /* This function frees all game memory and exits the program,
  * so it will never return. */
 void exit_game(void) {
+	TTF_CloseFont(font);
+	TTF_Quit();
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -121,6 +131,24 @@ static void title_screen(void) {
 	if (quit) exit_game();
 }
 
+static SDL_Texture *render_text_to_texture(const char *text, SDL_Color color) {
+	SDL_Surface *surface = TTF_RenderText_Solid(font, text, color);
+	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+	return texture;
+}
+
+static void render_hud(float speed) {
+	SDL_Color color = {255, 255, 255, 0};
+	char *speed_text;
+	int speed_text_len = SDL_asprintf(&speed_text, "SPEED %g", speed);
+	SDL_Texture *speed_texture = render_text_to_texture(speed_text, color);
+	free(speed_text);
+	SDL_Rect speed_rect = {0, 0, 8 * speed_text_len, 8};
+	SDL_RenderCopy(renderer, speed_texture, NULL, &speed_rect);
+	SDL_DestroyTexture(speed_texture);
+}
+
 static void game_loop(void) {
 	Lander *l = Lander_create(renderer);
 	SDL_Event e;
@@ -163,10 +191,9 @@ static void game_loop(void) {
 			}
 		}
 
-		SDL_SetRenderTarget(renderer, render_texture);
-		SDL_RenderClear(renderer);
 		renderbg();
 		Lander_render(l);
+		render_hud(l->speed);
 
 		render_screen();
 	}

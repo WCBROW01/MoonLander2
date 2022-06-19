@@ -58,6 +58,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	l->vel_grav -= GRAVITY / TICKRATE;
 	l->vel_x = l->vel_fuel_x;
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
+	l->speed = fabsf(roundf(sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
 
@@ -65,7 +66,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 }
 
 Lander *Lander_create(SDL_Renderer *renderer) {
-	SDL_Surface *sheet_data = SDL_LoadBMP("LunarModule Sprites/LunarModule.bmp");
+	SDL_Surface *sheet_data = SDL_LoadBMP("Sprites/LunarModule.bmp");
 	if (!sheet_data) {
 		fprintf(stderr, "Failed to load lander sprite! Error: %s\n", SDL_GetError());
 		exit(1);
@@ -98,6 +99,7 @@ void Lander_reset(Lander *l) {
 	l->vel_fuel_x = 0.0f;
 	l->vel_fuel_y = 0.0f;
 	l->vel_grav = 0.0f;
+	l->speed = 0.0f;
 	l->angle = M_PI_2;
 	l->anim_frame = 0;
 	l->anim_timer = 0;
