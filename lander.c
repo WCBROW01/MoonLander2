@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <math.h>
 
 #include <SDL2/SDL.h>
 
@@ -33,8 +32,8 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 
 	if (l->state) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
-		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * cosf(l->angle);
-		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * sinf(l->angle);
+		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_cosf(l->angle);
+		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_sinf(l->angle);
 		++l->anim_timer;
 		if (l->anim_timer == ANIM_TIME) {
 			++l->anim_frame;
@@ -42,8 +41,8 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 			l->anim_timer = 0;
 		}
 	} else {
-		l->vel_fuel_x -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_x) * fabs(cosf(l->angle));
-		l->vel_fuel_y -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_y) * fabs(sinf(l->angle));
+		l->vel_fuel_x -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_x) * SDL_fabs(SDL_cosf(l->angle));
+		l->vel_fuel_y -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_y) * SDL_fabs(SDL_sinf(l->angle));
 
 		l->anim_frame = 0;
 	}
@@ -58,7 +57,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	l->vel_grav -= GRAVITY / TICKRATE;
 	l->vel_x = l->vel_fuel_x;
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
-	l->speed = fabsf(roundf(sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
+	l->speed = SDL_fabsf(SDL_roundf(SDL_sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
 
@@ -100,7 +99,7 @@ void Lander_reset(Lander *l) {
 	l->vel_fuel_y = 0.0f;
 	l->vel_grav = 0.0f;
 	l->speed = 0.0f;
-	l->angle = M_PI_2;
+	l->angle = M_PI / 2;
 	l->anim_frame = 0;
 	l->anim_timer = 0;
 }
