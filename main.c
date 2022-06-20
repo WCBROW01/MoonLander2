@@ -23,6 +23,17 @@ static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
 static TTF_Font *font;
 
+/* This function frees all game memory and exits the program,
+ * so it will never return. */
+void exit_game(void) {
+	TTF_CloseFont(font);
+	TTF_Quit();
+	SDL_DestroyTexture(render_texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+}
+
 static void init_game(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
@@ -45,22 +56,21 @@ static void init_game(void) {
 		fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
 		exit(1);
 	}
+
 	// This texture will be used as a buffer for rendering,
 	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+	if (!render_texture) {
+		fprintf(stderr, "SDL_CreateTexture: %s\n", SDL_GetError());
+		exit(1);
+	}
 
 	font = TTF_OpenFont("PublicPixel.ttf", 8);
-}
+	if (!font) {
+		fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
+		exit(1);
+	}
 
-/* This function frees all game memory and exits the program,
- * so it will never return. */
-void exit_game(void) {
-	TTF_CloseFont(font);
-	TTF_Quit();
-	SDL_DestroyTexture(render_texture);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-	exit(0);
+	atexit(exit_game);
 }
 
 static void render_screen(void) {
@@ -128,7 +138,7 @@ static void title_screen(void) {
 	}
 
 	SDL_DestroyTexture(title_texture);
-	if (quit) exit_game();
+	if (quit) exit(0);
 }
 
 static SDL_Texture *render_text_to_texture(const char *text, SDL_Color color) {
@@ -206,5 +216,5 @@ int main(void) {
 	init_game();
 	title_screen();
 	game_loop();
-	exit_game();
+	return 0;
 }
