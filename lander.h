@@ -9,6 +9,7 @@
 #define MOONLANDER_LANDER_H
 
 #include <stdbool.h>
+#include "tilesheet.h"
 
 /* arbitrary floor is super temporary,
  * this will be useless if I make anything more advanced.
@@ -17,7 +18,7 @@
 
 typedef struct {
 	SDL_Renderer *renderer;
-	SDL_Texture *sprite_sheet;
+	TileSheet *sprite_sheet;
 	SDL_TimerID timer;
 	float pos_x, pos_y, vel_x, vel_y, speed, angle;
 	float vel_grav, vel_fuel_x, vel_fuel_y;

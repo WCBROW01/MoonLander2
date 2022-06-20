@@ -10,6 +10,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "tilesheet.h"
 #include "lander.h"
 
 #define LANDER_WIDTH 16
@@ -65,19 +66,11 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 }
 
 Lander *Lander_create(SDL_Renderer *renderer) {
-	SDL_Surface *sheet_data = SDL_LoadBMP("Sprites/LunarModule.bmp");
-	if (!sheet_data) {
-		fprintf(stderr, "Failed to load lander sprite! Error: %s\n", SDL_GetError());
-		exit(1);
-	}
-
 	Lander *l = malloc(sizeof(Lander));
 	*l = (Lander) {
 		.renderer = renderer,
-		.sprite_sheet = SDL_CreateTextureFromSurface(renderer, sheet_data)
+		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT)
 	};
-
-	SDL_FreeSurface(sheet_data);
 
 	Lander_reset(l);
 	l->timer = SDL_AddTimer(MS_PER_TICK, Lander_physics, l);
@@ -86,7 +79,7 @@ Lander *Lander_create(SDL_Renderer *renderer) {
 
 void Lander_destroy(Lander *l) {
 	SDL_RemoveTimer(l->timer);
-	SDL_DestroyTexture(l->sprite_sheet);
+	TileSheet_destroy(l->sprite_sheet);
 	free(l);
 }
 
@@ -115,7 +108,7 @@ void Lander_render(Lander *l) {
 		.h = LANDER_HEIGHT
 	};
 	
-	SDL_Rect sprite = {l->state * (l->anim_frame + 1) * LANDER_WIDTH, l->fast * LANDER_HEIGHT, LANDER_WIDTH, LANDER_HEIGHT};
+	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1));
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.
 	 * RenderCopyEx takes an angle in degrees and rotates clockwise,
@@ -123,7 +116,7 @@ void Lander_render(Lander *l) {
 	 * The sprite is also stored in the wrong direction,
 	 * so 90 degrees are added to the rotation. This will be fixed with the new sprite. */
 	SDL_RenderCopyEx(
-		l->renderer, l->sprite_sheet,
+		l->renderer, l->sprite_sheet->texture,
 		&sprite, &lander_rect,
 		RTOD(-l->angle) + 90, NULL, SDL_FLIP_NONE
 	);
