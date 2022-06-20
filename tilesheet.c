@@ -1,3 +1,10 @@
+/*
+ * Abstractions for using tilesheets with textures.
+ * Contributors: Will Brown
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #include <SDL2/SDL.h>
 
 #include "tilesheet.h"

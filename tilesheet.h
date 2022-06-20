@@ -1,3 +1,10 @@
+/*
+ * Abstractions for using tilesheets with textures.
+ * Contributors: Will Brown
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #ifndef MOONLANDER_TILESHEET_H
 #define MOONLANDER_TILESHEET_H
 
