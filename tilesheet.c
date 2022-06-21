@@ -5,6 +5,8 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
+#include <stdlib.h>
+
 #include <SDL2/SDL.h>
 
 #include "tilesheet.h"
@@ -49,10 +51,13 @@ void TileSheet_destroy(TileSheet *tilesheet) {
  * If an index greater than the last tile is given, a zero-value rectangle will be returned. */
 SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index) {
 	if (!tilesheet || index >= tilesheet->num_tiles) return (SDL_Rect) {0};
-	else return (SDL_Rect) {
-		.x = index % tilesheet->sheet_width * tilesheet->tile_width,
-		.y = index / tilesheet->sheet_width * tilesheet->tile_height,
-		.w = tilesheet->tile_width,
-		.h = tilesheet->tile_height
-	};
+	else {
+		div_t tile = div(index, tilesheet->sheet_width);
+		return (SDL_Rect) {
+			.x = tile.rem * tilesheet->tile_width,
+			.y = tile.quot * tilesheet->tile_height,
+			.w = tilesheet->tile_width,
+			.h = tilesheet->tile_height
+		};
+	}
 }
