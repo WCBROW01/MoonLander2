@@ -39,7 +39,7 @@ ML2_Map *ML2_Map_loadFromMem(void *src) {
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
 ML2_Map *ML2_Map_loadFromFile(const char *path) {
-	FILE *map_file = fopen(path, "r");
+	FILE *map_file = fopen(path, "rb");
 	if (!map_file) {
 		SDL_SetError("Failed to open map file %s: %s", path, strerror(errno));
 		return NULL;
