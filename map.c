@@ -1,3 +1,10 @@
+/*
+ * Map file routines for Moon Lander 2.
+ * Contributors: Will Brown
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>

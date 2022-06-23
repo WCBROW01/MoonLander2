@@ -1,3 +1,10 @@
+/*
+ * Map file routines for Moon Lander 2.
+ * Contributors: Will Brown
+ * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * See LICENSE or <https://www.gnu.org/licenses/>
+ */
+
 #ifndef MOONLANDER_MAP_H
 #define MOONLANDER_MAP_H
 
