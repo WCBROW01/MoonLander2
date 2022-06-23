@@ -22,7 +22,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 	TileSheet *tilesheet = malloc(sizeof(TileSheet));
 	if (!tilesheet) {
 		SDL_DestroyTexture(texture);
-		SDL_Error(SDL_ENOMEM);
+		SDL_SetError("Failed to allocate memory for tilesheet.");
 		return NULL;
 	} else {
 		int tilesheet_width, tilesheet_height;
