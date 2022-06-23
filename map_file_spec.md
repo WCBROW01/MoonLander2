@@ -26,7 +26,7 @@ The final 8 bytes of the header contain two little-endian unsigned 32-bit intege
 
 Map data is currently dead simple. Tiles are stored as a row-major array, with each tile being 1 byte long. This is subject to change, as compression may be added or tile length may be extended.
 
-The most significant bit of the tile denotes whether it is horizontally flipped, and the second most significant bit denotes whether it is vertically flipped, leaving 6 bits to denote what type of tile it is.
+The most significant bit of the tile denotes whether it is vertically flipped, and the second most significant bit denotes whether it is horizontally flipped, leaving 6 bits to denote what type of tile it is.
 This means you are currently able to address up to 64 individual types of tiles, each containing a parameter for direction flipped.
 
 The coordinate (0, 0) can be found at the bottom left of the map, matching the coordinate system for Moon Lander 2, so expanding a map can be done with a trivial for loop, possibly using memcpy to speed up the process. This also makes the format easier to deal with for other types of 2D games, like platformers.
