@@ -15,6 +15,7 @@
 
 #include "lander.h"
 #include "tilesheet.h"
+#include "tiles.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -67,7 +68,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	tiles = TileSheet_create("Tiles/space_rock.bmp", renderer, 16, 16);
+	tiles = TileSheet_create("tiles.bmp", renderer, 16, 16);
 
 	font = TTF_OpenFont("PublicPixel.ttf", 8);
 	if (!font) {
@@ -113,7 +114,7 @@ static void renderbg(void) {
 	SDL_RenderFillRect(renderer, &bg);
 
 	SDL_SetRenderDrawColor(renderer, 0xC0, 0xC0, 0xC0, 0xFF);
-	SDL_Rect rock_rect = TileSheet_getTileRect(tiles, 0);
+	SDL_Rect rock_rect = TileSheet_getTileRect(tiles, TILE_ROCK_0);
 	for (floor.x = 0; floor.x < SCREEN_WIDTH; floor.x += 16) {
 		SDL_RenderCopy(renderer, tiles->texture, &rock_rect, &floor);
 	}
