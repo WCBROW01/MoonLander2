@@ -21,7 +21,7 @@ typedef struct {
 	TileSheet *sprite_sheet;
 	SDL_TimerID timer;
 	float pos_x, pos_y, vel_x, vel_y, speed, angle;
-	float vel_grav, vel_fuel_x, vel_fuel_y;
+	float vel_grav, vel_fuel_x, vel_fuel_y, fuel_level;
 	char anim_frame, anim_timer;
 	char turning;
 	bool state : 1;

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -107,7 +108,7 @@ static void render_title(SDL_Texture *title) {
 static void renderbg(void) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_Rect floor = {0, SCREEN_HEIGHT - 16, 16, 16};
-	
+
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderFillRect(renderer, &bg);
 
@@ -157,15 +158,26 @@ static SDL_Texture *render_text_to_texture(const char *text, SDL_Color color) {
 	return texture;
 }
 
-static void render_hud(float speed) {
+static void render_text(SDL_Point *dst_point, const char *format, ...) {
 	SDL_Color color = {255, 255, 255, 0};
-	char *speed_text;
-	int speed_text_len = SDL_asprintf(&speed_text, "SPEED %g", speed);
-	SDL_Texture *speed_texture = render_text_to_texture(speed_text, color);
-	free(speed_text);
-	SDL_Rect speed_rect = {0, 0, 8 * speed_text_len, 8};
-	SDL_RenderCopy(renderer, speed_texture, NULL, &speed_rect);
-	SDL_DestroyTexture(speed_texture);
+	char *text;
+	va_list ap;
+	va_start(ap, format);
+	int text_len = SDL_vasprintf(&text, format, ap);
+	va_end(ap);
+
+	SDL_Texture *text_texture = render_text_to_texture(text, color);
+	free(text);
+	SDL_Rect speed_rect = {dst_point->x, dst_point->y, 8 * text_len, 8};
+	SDL_RenderCopy(renderer, text_texture, NULL, &speed_rect);
+	SDL_DestroyTexture(text_texture);
+}
+
+static void render_hud(float speed, float fuel) {
+	SDL_Point speed_point = {0, 0};
+	render_text(&speed_point, "SPEED %g", speed);
+	SDL_Point fuel_point = {0, 8};
+	render_text(&fuel_point, "FUEL: %.0f", fuel);
 }
 
 static void game_loop(void) {
@@ -212,7 +224,7 @@ static void game_loop(void) {
 
 		renderbg();
 		Lander_render(l);
-		render_hud(l->speed);
+		render_hud(l->speed, l->fuel_level);
 
 		render_screen();
 	}

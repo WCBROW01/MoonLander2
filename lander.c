@@ -31,7 +31,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 
 	l->angle -= l->turning * 0.01f;
 
-	if (l->state) {
+	if (l->state && l->fuel_level > 0.0f) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
 		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_cosf(l->angle);
 		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_sinf(l->angle);
@@ -40,13 +40,16 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 			++l->anim_frame;
 			l->anim_frame %= NUM_FRAMES;
 			l->anim_timer = 0;
+
+			l->fuel_level = l->fuel_level > 0 ? l->fuel_level - ACCEL * (l->fast * 1.25f + 1.0f) * 10.0f / TICKRATE : 0.0f;
 		}
 	} else {
-		l->vel_fuel_x -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_x) * SDL_fabs(SDL_cosf(l->angle));
-		l->vel_fuel_y -= ACCEL / TICKRATE / 2 * CMP_ZERO(l->vel_fuel_y) * SDL_fabs(SDL_sinf(l->angle));
-
+		l->vel_fuel_x -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabs(SDL_cosf(l->angle));
+		l->vel_fuel_y -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_y) * SDL_fabs(SDL_sinf(l->angle));
 		l->anim_frame = 0;
 	}
+
+	if (l->fuel_level < 0.0f) l->fuel_level = 0.0f;
 
 	// If the lander has landed, reset velocity and y position to zero.
 	if (l->pos_y <= 0.0) {
@@ -59,6 +62,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	l->vel_x = l->vel_fuel_x;
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
 	l->speed = SDL_fabsf(SDL_roundf(SDL_sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
+
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
 
@@ -90,6 +94,7 @@ void Lander_reset(Lander *l) {
 	l->vel_y = 0.0f;
 	l->vel_fuel_x = 0.0f;
 	l->vel_fuel_y = 0.0f;
+	l->fuel_level = 1000.0f;
 	l->vel_grav = 0.0f;
 	l->speed = 0.0f;
 	l->angle = M_PI / 2;
@@ -108,7 +113,7 @@ void Lander_render(Lander *l) {
 		.h = LANDER_HEIGHT
 	};
 	
-	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1));
+	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->fuel_level > 0 ? l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1) : 0);
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.
 	 * RenderCopyEx takes an angle in degrees and rotates clockwise,
