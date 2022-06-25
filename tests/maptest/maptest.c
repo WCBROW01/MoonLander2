@@ -157,6 +157,10 @@ void test_tiles(void) {
 	tile = ML2_Map_getTile(map, x, y, &flip);
 	printf("Got tile %d with flip type %d at coordinate %d,%d\n", tile, flip, x, y);
 	
+	printf("Testing overflow behavior... ");
+	int res = ML2_Map_getTile(map, 50, 50, NULL);
+	printf(res == -1 ? "OK\n" : "FAILED\n");
+	
 	ML2_Map_free(map);
 	remove("tile_test.ml2");
 }
