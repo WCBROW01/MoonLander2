@@ -13,6 +13,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "lander.h"
+#include "tilesheet.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -21,6 +22,7 @@
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
+static TileSheet *tiles;
 static TTF_Font *font;
 
 /* This function frees all game memory and exits the program,
@@ -64,6 +66,8 @@ static void init_game(void) {
 		exit(1);
 	}
 
+	tiles = TileSheet_create("Tiles/space_rock.bmp", renderer, 16, 16);
+
 	font = TTF_OpenFont("PublicPixel.ttf", 8);
 	if (!font) {
 		fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
@@ -102,11 +106,16 @@ static void render_title(SDL_Texture *title) {
 
 static void renderbg(void) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-	SDL_Rect floor = {0, SCREEN_HEIGHT - FLOOR_HEIGHT, SCREEN_WIDTH, FLOOR_HEIGHT};
+	SDL_Rect floor = {0, SCREEN_HEIGHT - 16, 16, 16};
+	
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderFillRect(renderer, &bg);
+
 	SDL_SetRenderDrawColor(renderer, 0xC0, 0xC0, 0xC0, 0xFF);
-	SDL_RenderFillRect(renderer, &floor);
+	SDL_Rect rock_rect = TileSheet_getTileRect(tiles, 0);
+	for (floor.x = 0; floor.x < SCREEN_WIDTH; floor.x += 16) {
+		SDL_RenderCopy(renderer, tiles->texture, &rock_rect, &floor);
+	}
 }
 
 static void title_screen(void) {
