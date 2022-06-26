@@ -178,7 +178,7 @@ static void render_hud(float speed, float fuel) {
 	SDL_Point speed_point = {0, 0};
 	render_text(&speed_point, "SPEED %g", speed);
 	SDL_Point fuel_point = {0, 8};
-	render_text(&fuel_point, "FUEL: %.0f", fuel);
+	render_text(&fuel_point, "FUEL %.0f", fuel);
 }
 
 static void game_loop(void) {
