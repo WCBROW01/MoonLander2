@@ -55,6 +55,7 @@ static void init_game(void) {
 		fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
 		exit(1);
 	}
+	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	if (TTF_Init() < 0) {
 		fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
