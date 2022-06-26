@@ -16,6 +16,7 @@
 #include "lander.h"
 #include "tilesheet.h"
 #include "tiles.h"
+#include "map.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -26,12 +27,15 @@ static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
 static TileSheet *tiles;
 static TTF_Font *font;
+static ML2_Map *map;
 
 /* This function frees all game memory and exits the program,
  * so it will never return. */
 void exit_game(void) {
+	ML2_Map_free(map);
 	TTF_CloseFont(font);
 	TTF_Quit();
+	TileSheet_destroy(tiles);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -77,6 +81,8 @@ static void init_game(void) {
 		exit(1);
 	}
 
+	map = ML2_Map_loadFromFile("test2.ml2");
+
 	atexit(exit_game);
 }
 
@@ -109,15 +115,43 @@ static void render_title(SDL_Texture *title) {
 
 static void renderbg(void) {
 	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-	SDL_Rect floor = {0, SCREEN_HEIGHT - 16, 16, 16};
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderFillRect(renderer, &bg);
+}
 
-	SDL_SetRenderDrawColor(renderer, 0xC0, 0xC0, 0xC0, 0xFF);
-	SDL_Rect rock_rect = TileSheet_getTileRect(tiles, TILE_ROCK_0);
-	for (floor.x = 0; floor.x < SCREEN_WIDTH; floor.x += 16) {
-		SDL_RenderCopy(renderer, tiles->texture, &rock_rect, &floor);
+static SDL_Point get_camera_pos(SDL_Point *player_pos) {
+	SDL_Point camera_pos = {
+		player_pos->x - SCREEN_WIDTH / 2,
+		player_pos->y - SCREEN_HEIGHT / 2
+	};
+
+	int map_w, map_h;
+	ML2_Map_getDim(map, &map_w, &map_h);
+
+	if (camera_pos.x < 0) {
+		camera_pos.x = 0;
+	} else if (camera_pos.x > map_w * 16 - SCREEN_WIDTH) {
+		camera_pos.x = map_w * 16 - SCREEN_WIDTH;
+	}
+
+	if (camera_pos.y < 0) {
+		camera_pos.y = 0;
+	} else if (camera_pos.y > map_h * 16 - SCREEN_HEIGHT) {
+		camera_pos.y = map_h * 16 - SCREEN_HEIGHT;
+	}
+
+	return camera_pos;
+}
+
+static void render_map(SDL_Point *camera_pos) {
+	for (int y = camera_pos->y; y < camera_pos->y + SCREEN_HEIGHT; y += 16) {
+		for (int x = camera_pos->x / 16; x < camera_pos->x + SCREEN_WIDTH; x += 16) {
+			int tile = ML2_Map_getTile(map, x / 16, y / 16, NULL);
+			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
+			SDL_Rect dst = {x - camera_pos->x, SCREEN_HEIGHT - y - camera_pos->y - 16, 16, 16};
+			SDL_RenderCopy(renderer, tiles->texture, &src, &dst);
+		}
 	}
 }
 
@@ -225,7 +259,10 @@ static void game_loop(void) {
 		}
 
 		renderbg();
-		Lander_render(l);
+		SDL_Point lander_point = {l->pos_x, l->pos_y};
+		SDL_Point camera_pos = get_camera_pos(&lander_point);
+		render_map(&camera_pos);
+		Lander_render(l, &camera_pos);
 		render_hud(l->speed, l->fuel_level);
 
 		render_screen();

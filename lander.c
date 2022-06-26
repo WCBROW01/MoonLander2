@@ -102,13 +102,13 @@ void Lander_reset(Lander *l) {
 	l->anim_timer = 0;
 }
 
-void Lander_render(Lander *l) {
+void Lander_render(Lander *l, SDL_Point *camera_pos) {
 	int s_width, s_height;
 	SDL_RenderGetLogicalSize(l->renderer, &s_width, &s_height);
 
 	SDL_Rect lander_rect = {
-		.x = l->pos_x - LANDER_WIDTH / 2,
-		.y = s_height - FLOOR_HEIGHT - LANDER_HEIGHT - l->pos_y,
+		.x = l->pos_x - LANDER_WIDTH / 2 - camera_pos->x,
+		.y = s_height - FLOOR_HEIGHT - LANDER_HEIGHT - l->pos_y - camera_pos->y,
 		.w = LANDER_WIDTH,
 		.h = LANDER_HEIGHT
 	};

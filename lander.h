@@ -29,8 +29,8 @@ typedef struct {
 } Lander;
 
 Lander *Lander_create(SDL_Renderer *renderer);
-void Lander_destroy(Lander *r);
-void Lander_reset(Lander *r);
-void Lander_render(Lander *r);
+void Lander_destroy(Lander *l);
+void Lander_reset(Lander *l);
+void Lander_render(Lander *l, SDL_Point *camera_pos);
 
 #endif

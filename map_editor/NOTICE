@@ -1,0 +1,1 @@
+Map editor has not been created yet. So far to create test maps I have been using create_blank_map.c to generate blank maps and placing tiles using a hex editor. This is very inconvenient and will definitely be remedied soon.
