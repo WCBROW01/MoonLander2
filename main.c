@@ -144,17 +144,6 @@ static SDL_Point get_camera_pos(SDL_Point *player_pos) {
 	return camera_pos;
 }
 
-static void render_map(SDL_Point *camera_pos) {
-	for (int y = camera_pos->y; y < camera_pos->y + SCREEN_HEIGHT; y += 16) {
-		for (int x = camera_pos->x / 16; x < camera_pos->x + SCREEN_WIDTH; x += 16) {
-			int tile = ML2_Map_getTile(map, x / 16, y / 16, NULL);
-			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
-			SDL_Rect dst = {x - camera_pos->x, SCREEN_HEIGHT - y - camera_pos->y - 16, 16, 16};
-			SDL_RenderCopy(renderer, tiles->texture, &src, &dst);
-		}
-	}
-}
-
 static void title_screen(void) {
 	// Load title screen bitmap
 	SDL_Surface *title_bmp = SDL_LoadBMP("ML_title.bmp");
@@ -261,7 +250,7 @@ static void game_loop(void) {
 		renderbg();
 		SDL_Point lander_point = {l->pos_x, l->pos_y};
 		SDL_Point camera_pos = get_camera_pos(&lander_point);
-		render_map(&camera_pos);
+		ML2_Map_render(map, renderer, tiles, &camera_pos);
 		Lander_render(l, &camera_pos);
 		render_hud(l->speed, l->fuel_level);
 

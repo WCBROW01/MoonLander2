@@ -11,6 +11,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "tilesheet.h"
 #include "map.h"
 
 struct ML2_Map {
@@ -101,4 +102,25 @@ void ML2_Map_getDim(ML2_Map *map, int *w, int *h) {
 	if (!map) return;
 	if (w) *w = map->width;
 	if (h) *h = map->height;
+}
+
+// Render map onto renderer with a given tileset and camera position.
+void ML2_Map_render(
+	ML2_Map *map, SDL_Renderer *renderer,
+	TileSheet *tiles, SDL_Point *camera_pos
+) {
+	int render_w, render_h;
+	SDL_RenderGetLogicalSize(renderer, &render_w, &render_h);
+	if (!render_w || !render_h)
+		SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
+	
+	for (int y = camera_pos->y; y < camera_pos->y + render_h; y += 16) {
+		for (int x = camera_pos->x / 16; x < camera_pos->x + render_w; x += 16) {
+			int flip;
+			int tile = ML2_Map_getTile(map, x / 16, y / 16, &flip);
+			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
+			SDL_Rect dst = {x - camera_pos->x, render_h - y - camera_pos->y - 16, 16, 16};
+			SDL_RenderCopyEx(renderer, tiles->texture, &src, &dst, 0, NULL, flip);
+		}
+	}
 }
