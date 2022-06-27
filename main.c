@@ -261,7 +261,9 @@ static void game_loop(void) {
 	Lander_destroy(l);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+	(void) argc;
+	(void) argv;
 	init_game();
 	title_screen();
 	game_loop();
