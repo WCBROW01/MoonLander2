@@ -7,8 +7,9 @@ enum tile {
     TILE_ROCK_1,
     TILE_ROCK_2,
     TILE_ROCK_3,
+    TILE_EARTH,
     TILE_STARS,
-    TILE_EARTH
+    TILE_STARS_EARTH
 };
 
 #endif
