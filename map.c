@@ -116,7 +116,7 @@ void ML2_Map_render(
 	
 	for (int y = camera_pos->y; y < camera_pos->y + render_h; y += 16) {
 		for (int x = camera_pos->x / 16; x < camera_pos->x + render_w; x += 16) {
-			int flip;
+			int flip = 0;
 			int tile = ML2_Map_getTile(map, x / 16, y / 16, &flip);
 			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
 			SDL_Rect dst = {x - camera_pos->x, render_h - y - camera_pos->y - 16, 16, 16};
