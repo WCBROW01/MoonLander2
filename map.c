@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "tilesheet.h"
 #include "map.h"

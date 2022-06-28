@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "tilesheet.h"
 #include "lander.h"
