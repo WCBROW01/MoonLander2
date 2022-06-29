@@ -114,12 +114,12 @@ void ML2_Map_render(
 	if (!render_w || !render_h)
 		SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
 	
-	for (int y = camera_pos->y; y < camera_pos->y + render_h; y += 16) {
-		for (int x = camera_pos->x / 16; x < camera_pos->x + render_w; x += 16) {
+	for (int y = camera_pos->y / 16; y <= (camera_pos->y + render_h) / 16; ++y) {
+		for (int x = camera_pos->x / 16; x <= (camera_pos->x + render_w) / 16; ++x) {
 			int flip = 0;
-			int tile = ML2_Map_getTile(map, x / 16, y / 16, &flip);
+			int tile = ML2_Map_getTile(map, x, y, &flip);
 			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
-			SDL_Rect dst = {x - camera_pos->x, render_h - y - camera_pos->y - 16, 16, 16};
+			SDL_Rect dst = {x * 16 - camera_pos->x, render_h - y * 16 + camera_pos->y - 16, 16, 16};
 			SDL_RenderCopyEx(renderer, tiles->texture, &src, &dst, 0, NULL, flip);
 		}
 	}

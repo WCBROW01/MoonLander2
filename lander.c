@@ -108,7 +108,7 @@ void Lander_render(Lander *l, SDL_Point *camera_pos) {
 
 	SDL_Rect lander_rect = {
 		.x = l->pos_x - LANDER_WIDTH / 2 - camera_pos->x,
-		.y = s_height - FLOOR_HEIGHT - LANDER_HEIGHT - l->pos_y - camera_pos->y,
+		.y = s_height - l->pos_y + camera_pos->y - FLOOR_HEIGHT - LANDER_HEIGHT,
 		.w = LANDER_WIDTH,
 		.h = LANDER_HEIGHT
 	};
