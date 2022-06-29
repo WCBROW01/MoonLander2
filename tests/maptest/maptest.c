@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
-#include "../../map.h"
+#include "../../shared/map.h"
 
 static const char SIG[] = "ML2";
 static const uint32_t REV = 1;

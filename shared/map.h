@@ -8,6 +8,10 @@
 #ifndef MOONLANDER_MAP_H
 #define MOONLANDER_MAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ML2_Map ML2_Map;
 
 /* Load a map from memory. Essentially just a validity check and a cast,
@@ -38,5 +42,9 @@ void ML2_Map_render(
 	ML2_Map *map, SDL_Renderer *renderer,
 	TileSheet *tiles, SDL_Point *camera_pos
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
