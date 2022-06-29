@@ -43,6 +43,9 @@ void ML2_Map_render(
 	TileSheet *tiles, SDL_Point *camera_pos
 );
 
+// Hot reload a map. Can only be done if the map is the same size.
+void ML2_Map_reload(ML2_Map *map, const char *path);
+
 #ifdef __cplusplus
 }
 #endif

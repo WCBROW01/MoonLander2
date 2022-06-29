@@ -81,7 +81,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	map = ML2_Map_loadFromFile("test2.ml2");
+	map = ML2_Map_loadFromFile("test3.ml2");
 
 	atexit(exit_game);
 }
@@ -215,6 +215,9 @@ static void game_loop(void) {
 			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_ESCAPE:
 				quit = true;
+				break;
+			case SDLK_F5:
+				ML2_Map_reload(map, "test3.ml2");
 				break;
 			case SDLK_SPACE:
 				l->state = 1;
