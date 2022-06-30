@@ -131,7 +131,7 @@ static void renderbg(void) {
 	SDL_RenderFillRect(renderer, &bg);
 }
 
-static SDL_Point get_camera_pos(SDL_Point *player_pos) {
+static SDL_Point get_camera_pos(const SDL_Point *player_pos) {
 	SDL_Point camera_pos = {
 		player_pos->x - screen_w / 2,
 		player_pos->y - screen_h / 2
@@ -198,7 +198,7 @@ static SDL_Texture *render_text_to_texture(const char *text, SDL_Color color) {
 	return texture;
 }
 
-static void render_text(SDL_Point *dst_point, const char *format, ...) {
+static void render_text(const SDL_Point *dst_point, const char *format, ...) {
 	SDL_Color color = {255, 255, 255, 0};
 	char *text;
 	va_list ap;
