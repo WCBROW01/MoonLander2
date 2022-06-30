@@ -18,11 +18,12 @@
 #include "tiles.h"
 #include "map.h"
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+
 
 // Game state, may end up in a struct at some point.
 static SDL_Window *window;
+static int screen_w;
+static int screen_h;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
 static TileSheet *tiles;
@@ -42,6 +43,21 @@ void exit_game(void) {
 	SDL_Quit();
 }
 
+static void new_render_texture(int win_w, int win_h) {
+	double ratio = win_w > win_h ? (double) win_w / win_h : (double) win_h / win_w;
+	screen_w = win_w > win_h ? ratio * 240 : 240;
+	screen_h = win_w > win_h ? 240 : ratio * 240;
+
+	SDL_DestroyTexture(render_texture);
+	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+	if (!render_texture) {
+		fprintf(stderr, "SDL_CreateTexture: %s\n", SDL_GetError());
+		exit(1);
+	} else {
+		SDL_SetRenderTarget(renderer, render_texture);
+	}
+}
+
 static void init_game(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
@@ -59,7 +75,6 @@ static void init_game(void) {
 		fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
 		exit(1);
 	}
-	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	if (TTF_Init() < 0) {
 		fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
@@ -67,11 +82,7 @@ static void init_game(void) {
 	}
 
 	// This texture will be used as a buffer for rendering,
-	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-	if (!render_texture) {
-		fprintf(stderr, "SDL_CreateTexture: %s\n", SDL_GetError());
-		exit(1);
-	}
+	new_render_texture(640, 480);
 
 	tiles = TileSheet_create("tiles.bmp", renderer, 16, 16);
 
@@ -100,11 +111,11 @@ static void render_title(SDL_Texture *title) {
 	SDL_QueryTexture(title, NULL, NULL, &w, &h);
 	w *= 4;
 	h *= 4;
-	SDL_Rect title_rect = {SCREEN_WIDTH / 2 - w / 2, SCREEN_HEIGHT / 3 - h / 2, w, h};
+	SDL_Rect title_rect = {screen_w / 2 - w / 2, screen_h / 3 - h / 2, w, h};
 
 	SDL_Rect outline[4];
 	for (int i = 0; i < 4; ++i)
-		outline[i] = (SDL_Rect) {i, i, SCREEN_WIDTH - 2 * i, SCREEN_HEIGHT - 2 * i};
+		outline[i] = (SDL_Rect) {i, i, screen_w - 2 * i, screen_h - 2 * i};
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(renderer);
@@ -114,7 +125,7 @@ static void render_title(SDL_Texture *title) {
 }
 
 static void renderbg(void) {
-	SDL_Rect bg = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+	SDL_Rect bg = {0, 0, screen_w, screen_h};
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderFillRect(renderer, &bg);
@@ -122,8 +133,8 @@ static void renderbg(void) {
 
 static SDL_Point get_camera_pos(SDL_Point *player_pos) {
 	SDL_Point camera_pos = {
-		player_pos->x - SCREEN_WIDTH / 2,
-		player_pos->y - SCREEN_HEIGHT / 2
+		player_pos->x - screen_w / 2,
+		player_pos->y - screen_h / 2
 	};
 
 	int map_w, map_h;
@@ -131,14 +142,14 @@ static SDL_Point get_camera_pos(SDL_Point *player_pos) {
 
 	if (camera_pos.x < 0) {
 		camera_pos.x = 0;
-	} else if (camera_pos.x > map_w * 16 - SCREEN_WIDTH) {
-		camera_pos.x = map_w * 16 - SCREEN_WIDTH;
+	} else if (camera_pos.x > map_w * 16 - screen_w) {
+		camera_pos.x = map_w * 16 - screen_w;
 	}
 
 	if (camera_pos.y < 0) {
 		camera_pos.y = 0;
-	} else if (camera_pos.y > map_h * 16 - SCREEN_HEIGHT) {
-		camera_pos.y = map_h * 16 - SCREEN_HEIGHT;
+	} else if (camera_pos.y > map_h * 16 - screen_h) {
+		camera_pos.y = map_h * 16 - screen_h;
 	}
 
 	return camera_pos;
@@ -163,6 +174,10 @@ static void title_screen(void) {
 				break;
 			case SDLK_RETURN:
 				title = true;
+				break;
+			} else if (e.type == SDL_WINDOWEVENT) switch (e.window.event) {
+			case SDL_WINDOWEVENT_RESIZED:
+				new_render_texture(e.window.data1, e.window.data2);
 				break;
 			}
 		}
@@ -246,6 +261,10 @@ static void game_loop(void) {
 				break;
 			case SDLK_RIGHT:
 				--l->turning;
+				break;
+			} else if (e.type == SDL_WINDOWEVENT) switch (e.window.event) {
+			case SDL_WINDOWEVENT_RESIZED:
+				new_render_texture(e.window.data1, e.window.data2);
 				break;
 			}
 		}
