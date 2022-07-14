@@ -10,9 +10,7 @@
 #include <SDL2/SDL.h>
 
 #include "tilesheet.h"
-
-// Fonts will be implemented as an abstraction of tilesheets.
-typedef TileSheet Font;
+#include "font.h"
 
 Font *Font_create(const char *file_path, SDL_Renderer *renderer) {
 	return TileSheet_create(file_path, renderer, 8, 8);
