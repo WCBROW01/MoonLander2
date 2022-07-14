@@ -8,8 +8,8 @@ Why did I decide to make this? I have no idea. The first project is just a meme 
 
 - [ ] It should feel like an actual game.
 - [x] It will have 2D motion.
-- [ ] It will have a larger more detailed board, with real terrain. (maybe procedurally generated?)
-- [ ] The camera will either change size as you get higher (akin to the Atari game), or scroll.
+- [x] It will have a larger more detailed board, with real terrain. (maybe procedurally generated?)
+- [x] The camera will either change size as you get higher (akin to the Atari game), or scroll.
 - [ ] Just generally act more like the Atari lunar lander game.
 
 Regardless, this is mostly an excuse for me to do some graphics programming, so don’t actually expect any of this to be here.
@@ -20,17 +20,17 @@ Special thanks to [Jerrin Redmon](https://github.com/CircuitBread0111) for the e
 
 Currently the only external asset is the in-game font, which is distributed with the source code.
 
-The font currently in use is [Public Pixel Font](https://ggbot.itch.io/public-pixel-font) version 1.0, created by [GGBotNet](https://www.ggbot.net/fonts/).
+The font currently in use is [Public Pixel Font](https://ggbot.itch.io/public-pixel-font) version 1.0, created by [GGBotNet](https://www.ggbot.net/fonts/). It has been modified to be used as a bitmap font, and only the ASCII characterset is included.
 
 ## Building
 
-To build, you only need to install SDL 2, SDF_ttf 2, and run `make`
+To build, you only need to install SDL 2 and run `make`
 
-On Linux or macOS, you can get this from your package manager. If you’re on Windows, you’re on your own.
+On Linux or macOS, you can get this from your package manager. Instructions for Windows will be published later.
 
 Example for Debian/Ubuntu:
 
 ```sh
-sudo apt install libsdl2-dev libsdl-ttf2.0-dev
+sudo apt install libsdl2-dev
 ```
 

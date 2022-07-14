@@ -5,7 +5,7 @@ lib_src = $(wildcard shared/*.c)
 lib_obj = $(lib_src:.c=.o)
 
 CFLAGS = -Wall -Wextra `sdl2-config --cflags` -O3 -Ishared -fpic
-LDFLAGS = `sdl2-config --libs` -lSDL2_ttf
+LDFLAGS = `sdl2-config --libs`
 
 moonlander: $(game_obj) libML2.a
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)

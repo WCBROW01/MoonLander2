@@ -11,11 +11,11 @@
 #include <stdarg.h>
 
 #include <SDL.h>
-#include <SDL_ttf.h>
 
 #include "lander.h"
 #include "tilesheet.h"
 #include "tiles.h"
+#include "font.h"
 #include "map.h"
 
 
@@ -27,15 +27,13 @@ static int screen_h;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
 static TileSheet *tiles;
-static TTF_Font *font;
+static Font *font;
 static ML2_Map *map;
 
 /* This function frees all game memory and exits the program,
  * so it will never return. */
 void exit_game(void) {
 	ML2_Map_free(map);
-	TTF_CloseFont(font);
-	TTF_Quit();
 	TileSheet_destroy(tiles);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
@@ -76,19 +74,14 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	if (TTF_Init() < 0) {
-		fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
-		exit(1);
-	}
-
 	// This texture will be used as a buffer for rendering,
 	new_render_texture(640, 480);
 
 	tiles = TileSheet_create("tiles.bmp", renderer, 16, 16);
 
-	font = TTF_OpenFont("PublicPixel.ttf", 8);
+	font = Font_create("font.bmp", renderer);
 	if (!font) {
-		fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
+		fprintf(stderr, "Font_create: %s\n", SDL_GetError());
 		exit(1);
 	}
 
@@ -191,33 +184,8 @@ static void title_screen(void) {
 	if (quit) exit(0);
 }
 
-static SDL_Texture *render_text_to_texture(const char *text, SDL_Color color) {
-	SDL_Surface *surface = TTF_RenderText_Solid(font, text, color);
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_FreeSurface(surface);
-	return texture;
-}
-
-static void render_text(const SDL_Point *dst_point, const char *format, ...) {
-	SDL_Color color = {255, 255, 255, 0};
-	char *text;
-	va_list ap;
-	va_start(ap, format);
-	int text_len = SDL_vasprintf(&text, format, ap);
-	va_end(ap);
-
-	SDL_Texture *text_texture = render_text_to_texture(text, color);
-	free(text);
-	SDL_Rect speed_rect = {dst_point->x, dst_point->y, 8 * text_len, 8};
-	SDL_RenderCopy(renderer, text_texture, NULL, &speed_rect);
-	SDL_DestroyTexture(text_texture);
-}
-
 static void render_hud(float speed, float fuel) {
-	SDL_Point speed_point = {0, 0};
-	render_text(&speed_point, "SPEED %g", speed);
-	SDL_Point fuel_point = {0, 8};
-	render_text(&fuel_point, "FUEL %.0f", fuel);
+	Font_renderFormatted(font, renderer, NULL, "SPEED %g\nFUEL %.0f", speed, fuel);
 }
 
 static void game_loop(void) {
