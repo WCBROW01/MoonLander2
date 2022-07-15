@@ -125,8 +125,10 @@ void ML2_Map_render(
 	}
 }
 
-void ML2_Map_reload(ML2_Map *map, const char *path) {
+void ML2_Map_reload(ML2_Map **map, const char *path) {
 	ML2_Map *new = ML2_Map_loadFromFile(path);
-	if (new) memcpy(map, new, sizeof(ML2_Map) + map->width * map->height);
-	ML2_Map_free(new);
+	if (new) {
+		ML2_Map_free(*map);
+		*map = new;
+	}
 }
