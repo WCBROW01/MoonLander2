@@ -200,7 +200,7 @@ static void game_loop(void) {
 				quit = true;
 				break;
 			case SDLK_F5:
-				ML2_Map_reload(map, "test3.ml2");
+				ML2_Map_reload(&map, "test3.ml2");
 				break;
 			case SDLK_SPACE:
 				l->state = 1;
