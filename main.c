@@ -185,7 +185,7 @@ static void title_screen(void) {
 }
 
 static void render_hud(float speed, float fuel) {
-	Font_renderFormatted(font, renderer, NULL, "SPEED %g\nFUEL %.0f", speed, fuel);
+	Font_renderFormatted(font, renderer, NULL, "SPEED %.0f\nFUEL %.0f", speed, fuel);
 }
 
 static void game_loop(void) {
