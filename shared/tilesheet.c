@@ -13,6 +13,8 @@
 TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int tile_width, int tile_height) {
 	SDL_Surface *surface = SDL_LoadBMP(file_path);
 	if (!surface) return NULL;
+	// 0x00FF00 will be used as a key for transparency.
+	SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 	SDL_FreeSurface(surface);
 	if (!texture) return NULL;

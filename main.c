@@ -151,6 +151,8 @@ static SDL_Point get_camera_pos(const SDL_Point *player_pos) {
 static void title_screen(void) {
 	// Load title screen bitmap
 	SDL_Surface *title_bmp = SDL_LoadBMP("ML_title.bmp");
+	// 0x00FF00 will be used as a key for transparency.
+	SDL_SetColorKey(title_bmp, SDL_TRUE, SDL_MapRGB(title_bmp->format, 0, 255, 0));
 	SDL_Texture *title_texture = SDL_CreateTextureFromSurface(renderer, title_bmp);
 	SDL_FreeSurface(title_bmp);
 
