@@ -35,7 +35,7 @@ void ML2_Map_free(ML2_Map *map);
 int ML2_Map_getTile(ML2_Map *map, uint32_t x, uint32_t y, int *flip);
 
 // Puts dimensions of map into 
-void ML2_Map_getDim(ML2_Map *map, int *w, int *h);
+void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h);
 
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(

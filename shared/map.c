@@ -98,7 +98,7 @@ int ML2_Map_getTile(ML2_Map *map, uint32_t x, uint32_t y, int *flip) {
 	return tile_data & 63;
 }
 
-void ML2_Map_getDim(ML2_Map *map, int *w, int *h) {
+void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h) {
 	if (!map) return;
 	if (w) *w = map->width;
 	if (h) *h = map->height;
