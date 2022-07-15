@@ -59,10 +59,10 @@ ML2_Map *ML2_Map_loadFromFile(const char *path) {
 	
 	// Allocate memory for map
 	size_t map_size = map_header.width * map_header.height;
-	ML2_Map *map = malloc(sizeof(ML2_Map) + map_size);
+	ML2_Map *map = SDL_malloc(sizeof(ML2_Map) + map_size);
 	if (!map) {
 		SDL_SetError("Failed to load map file %s into memory: not enough memory.", path);
-		free(map);
+		SDL_free(map);
 		fclose(map_file);
 		return NULL;
 	} else {
@@ -73,7 +73,7 @@ ML2_Map *ML2_Map_loadFromFile(const char *path) {
 	if (fread(map->data, 1, map_size, map_file) != map_size) {
 		// Didn't get the correct number of bytes from the file.
 		SDL_SetError("Failed to load map file %s into memory: it is an invalid map file.", path);
-		free(map);
+		SDL_free(map);
 		fclose(map_file);
 		return NULL;
 	}
@@ -84,7 +84,7 @@ ML2_Map *ML2_Map_loadFromFile(const char *path) {
 
 // Currently only calls free, here just in case it is needed later.
 void ML2_Map_free(ML2_Map *map) {
-	free(map);
+	SDL_free(map);
 }
 
 /* Takes a map and coordinates, and gives you the attributes of the tile at

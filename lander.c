@@ -5,7 +5,6 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
-#include <stdlib.h>
 #include <stdbool.h>
 
 #include <SDL.h>
@@ -70,7 +69,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 }
 
 Lander *Lander_create(SDL_Renderer *renderer) {
-	Lander *l = malloc(sizeof(Lander));
+	Lander *l = SDL_malloc(sizeof(Lander));
 	*l = (Lander) {
 		.renderer = renderer,
 		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT)
@@ -84,7 +83,7 @@ Lander *Lander_create(SDL_Renderer *renderer) {
 void Lander_destroy(Lander *l) {
 	SDL_RemoveTimer(l->timer);
 	TileSheet_destroy(l->sprite_sheet);
-	free(l);
+	SDL_free(l);
 }
 
 void Lander_reset(Lander *l) {

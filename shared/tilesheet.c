@@ -5,8 +5,6 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
-#include <stdlib.h>
-
 #include <SDL.h>
 
 #include "tilesheet.h"
@@ -19,7 +17,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 	SDL_FreeSurface(surface);
 	if (!texture) return NULL;
 	
-	TileSheet *tilesheet = malloc(sizeof(TileSheet));
+	TileSheet *tilesheet = SDL_malloc(sizeof(TileSheet));
 	if (!tilesheet) {
 		SDL_DestroyTexture(texture);
 		SDL_SetError("Failed to allocate memory for tilesheet.");
@@ -44,7 +42,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 void TileSheet_destroy(TileSheet *tilesheet) {
 	if (!tilesheet) return;
 	SDL_DestroyTexture(tilesheet->texture);
-	free(tilesheet);
+	SDL_free(tilesheet);
 }
 
 /* Creates a rectangle representing the position of a given tile.
