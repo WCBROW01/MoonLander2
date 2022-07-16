@@ -62,17 +62,13 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	window = SDL_CreateWindow("Moon Lander", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE);
-	if (!window) {
-		fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
+	SDL_CreateWindowAndRenderer(640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer);
+	if (!window || !renderer) {
+		fprintf(stderr, "SDL_CreateWindowAndRenderer: %s\n", SDL_GetError());
 		exit(1);
 	}
 
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-	if (!renderer) {
-		fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
-		exit(1);
-	}
+	SDL_SetWindowTitle(window, "Moon Lander");
 
 	// This texture will be used as a buffer for rendering,
 	new_render_texture(640, 480);
