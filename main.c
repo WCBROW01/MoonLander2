@@ -47,7 +47,7 @@ static void new_render_texture(int win_w, int win_h) {
 	screen_h = win_w > win_h ? 240 : ratio * 240;
 
 	SDL_DestroyTexture(render_texture);
-	render_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
+	render_texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_TARGET, screen_w, screen_h);
 	if (!render_texture) {
 		fprintf(stderr, "SDL_CreateTexture: %s\n", SDL_GetError());
 		exit(1);
