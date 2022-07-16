@@ -69,6 +69,7 @@ static void init_game(void) {
 	}
 
 	SDL_SetWindowTitle(window, "Moon Lander");
+	SDL_RenderSetVSync(renderer, 1);
 
 	// This texture will be used as a buffer for rendering,
 	new_render_texture(640, 480);
