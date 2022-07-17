@@ -11,6 +11,7 @@
 
 #include "tilesheet.h"
 #include "lander.h"
+#include "map.h"
 
 #define LANDER_WIDTH 16
 #define LANDER_HEIGHT 13
@@ -50,13 +51,6 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 
 	if (l->fuel_level < 0.0f) l->fuel_level = 0.0f;
 
-	// If the lander has landed, reset velocity and y position to zero.
-	if (l->pos_y <= 0.0) {
-		if (l->vel_fuel_y < 0.1f && l->vel_fuel_y > -0.1f) l->vel_fuel_y = 0.0f;
-		l->pos_y = 0.0f;
-		l->vel_grav = 0.0f;
-	}
-
 	l->vel_grav -= GRAVITY / TICKRATE;
 	l->vel_x = l->vel_fuel_x;
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
@@ -65,14 +59,22 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
 
+	SDL_Rect collision_rect = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
+	if (ML2_Map_doCollision(l->map, &collision_rect)) {
+		l->pos_x -= l->vel_x / TICKRATE;
+		l->pos_y -= l->vel_y / TICKRATE;
+		l->vel_grav = 0;
+	}
+	
 	return interval;
 }
 
-Lander *Lander_create(SDL_Renderer *renderer) {
+Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map) {
 	Lander *l = SDL_malloc(sizeof(Lander));
 	*l = (Lander) {
 		.renderer = renderer,
-		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT)
+		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT),
+		.map = map
 	};
 
 	Lander_reset(l);
@@ -106,8 +108,8 @@ void Lander_render(Lander *l, SDL_Point *camera_pos) {
 	SDL_RenderGetLogicalSize(l->renderer, &s_width, &s_height);
 
 	SDL_Rect lander_rect = {
-		.x = l->pos_x - LANDER_WIDTH / 2 - camera_pos->x,
-		.y = s_height - l->pos_y + camera_pos->y - FLOOR_HEIGHT - LANDER_HEIGHT,
+		.x = l->pos_x - camera_pos->x,
+		.y = s_height - l->pos_y + camera_pos->y - LANDER_HEIGHT,
 		.w = LANDER_WIDTH,
 		.h = LANDER_HEIGHT
 	};

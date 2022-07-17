@@ -5,6 +5,7 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
@@ -12,6 +13,7 @@
 #include <SDL.h>
 
 #include "tilesheet.h"
+#include "tiles.h"
 #include "map.h"
 
 struct ML2_Map {
@@ -125,10 +127,34 @@ void ML2_Map_render(
 	}
 }
 
-void ML2_Map_reload(ML2_Map **map, const char *path) {
+void ML2_Map_reload(ML2_Map *map, const char *path) {
 	ML2_Map *new = ML2_Map_loadFromFile(path);
-	if (new) {
-		ML2_Map_free(*map);
-		*map = new;
+	if (new) memcpy(map, new, sizeof(ML2_Map) + map->width * map->height);
+	ML2_Map_free(new);
+}
+
+// Returns whether the rectangle is currently colliding with a tile
+bool ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r) {
+	struct {
+		int tile;
+		int flip;
+	} possible_tiles[4];
+
+	possible_tiles[0].tile = ML2_Map_getTile(map, r->x / 16, r->y / 16, &possible_tiles[0].flip);
+	possible_tiles[1].tile = ML2_Map_getTile(map, (r->x + r->w) / 16, r->y / 16, &possible_tiles[1].flip);
+	possible_tiles[2].tile = ML2_Map_getTile(map, r->x / 16, (r->y + r->h) / 16, &possible_tiles[2].flip);
+	possible_tiles[3].tile = ML2_Map_getTile(map, (r->x + r->w) / 16, (r->y + r->h) / 16, &possible_tiles[3].flip);
+
+	for (int i = 0; i < 4; ++i) {
+		if (possible_tiles[i].tile != -1) {
+			for (int j = 0; j < 16 && !SDL_RectEmpty(&TILE_COLLISION_BOXES[possible_tiles[i].tile][j]); ++i) {
+				SDL_Rect collider = TILE_COLLISION_BOXES[possible_tiles[i].tile][j];
+				collider.x += r->x - r->x % 16;
+				collider.y += r->y - r->y % 16;
+				if (SDL_HasIntersection(r, &collider)) return true;
+			}
+		}
 	}
+
+	return false;
 }

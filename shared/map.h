@@ -37,6 +37,9 @@ int ML2_Map_getTile(ML2_Map *map, uint32_t x, uint32_t y, int *flip);
 // Puts dimensions of map into 
 void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h);
 
+// Returns whether the rectangle is currently colliding with a tile
+bool ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r);
+
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(
 	ML2_Map *map, SDL_Renderer *renderer,
@@ -44,7 +47,7 @@ void ML2_Map_render(
 );
 
 // Hot reload a map.
-void ML2_Map_reload(ML2_Map **map, const char *path);
+void ML2_Map_reload(ML2_Map *map, const char *path);
 
 #ifdef __cplusplus
 }

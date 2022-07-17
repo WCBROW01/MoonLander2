@@ -10,15 +10,12 @@
 
 #include <stdbool.h>
 #include "tilesheet.h"
-
-/* arbitrary floor is super temporary,
- * this will be useless if I make anything more advanced.
- * I'll also have to redo the drawing code, but I need to do so anyways. */
-#define FLOOR_HEIGHT 16
+#include "map.h"
 
 typedef struct {
 	SDL_Renderer *renderer;
 	TileSheet *sprite_sheet;
+	ML2_Map *map;
 	SDL_TimerID timer;
 	float pos_x, pos_y, vel_x, vel_y, speed, angle;
 	float vel_grav, vel_fuel_x, vel_fuel_y, fuel_level;
@@ -28,7 +25,7 @@ typedef struct {
 	bool fast : 1;
 } Lander;
 
-Lander *Lander_create(SDL_Renderer *renderer);
+Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map);
 void Lander_destroy(Lander *l);
 void Lander_reset(Lander *l);
 void Lander_render(Lander *l, SDL_Point *camera_pos);
