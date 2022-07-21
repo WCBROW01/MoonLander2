@@ -8,6 +8,10 @@
 #ifndef MOONLANDER_TILESHEET_H
 #define MOONLANDER_TILESHEET_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct  {
 	SDL_Texture *texture;
 	int tile_width, tile_height;
@@ -24,5 +28,9 @@ void TileSheet_destroy(TileSheet *tilesheet);
 /* Creates a rectangle representing the position of a given tile.
  * If an index greater than the last tile is given, a zero-value rectangle will be returned. */
 SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
