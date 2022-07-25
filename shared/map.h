@@ -12,6 +12,11 @@
 extern "C" {
 #endif
 
+enum ML2_Map_CollisionAxis {
+	ML2_MAP_COLLIDED_X = 1,
+	ML2_MAP_COLLIDED_Y = 2
+};
+
 typedef struct ML2_Map ML2_Map;
 
 /* Load a map from memory. Essentially just a validity check and a cast,
@@ -37,8 +42,8 @@ int ML2_Map_getTile(ML2_Map *map, uint32_t x, uint32_t y, int *flip);
 // Puts dimensions of map into 
 void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h);
 
-// Returns whether the rectangle is currently colliding with a tile
-bool ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r);
+// Returns whether the rectangle is currently colliding with a tile and the direction.
+int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old);
 
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(

@@ -41,7 +41,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 			l->anim_frame %= NUM_FRAMES;
 			l->anim_timer = 0;
 
-			l->fuel_level = l->fuel_level > 0 ? l->fuel_level - ACCEL * (l->fast * 1.25f + 1.0f) * 10.0f / TICKRATE : 0.0f;
+			l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.25f + 1.0f) * 10.0f / TICKRATE : 0.0f;
 		}
 	} else {
 		l->vel_fuel_x -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabs(SDL_cosf(l->angle));
@@ -56,13 +56,20 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
 	l->speed = SDL_fabsf(SDL_roundf(SDL_sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
 
+	SDL_Rect collision_rect_old = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
 
 	SDL_Rect collision_rect = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
-	if (ML2_Map_doCollision(l->map, &collision_rect)) {
+	int collision = ML2_Map_doCollision(l->map, &collision_rect, &collision_rect_old);
+	if (collision & ML2_MAP_COLLIDED_X) {
 		l->pos_x -= l->vel_x / TICKRATE;
+		l->vel_fuel_x /= 2;
+	}
+	
+	if (collision & ML2_MAP_COLLIDED_Y) {
 		l->pos_y -= l->vel_y / TICKRATE;
+		l->vel_fuel_y /= 2;
 		l->vel_grav = 0;
 	}
 	
