@@ -6,9 +6,7 @@ extern "C" {
 #endif
 
 #include <assert.h>
-#include <SDL2/SDL.h>
-
-//typedef SDL_Rect TileCollision[16];
+#include <SDL.h>
 
 enum tile {
 	TILE_NONE,

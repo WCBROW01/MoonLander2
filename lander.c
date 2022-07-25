@@ -5,6 +5,10 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
+/* Required for M_PI on GCC. SDL normally defines thisif it doesn't exist
+ * on your platform, so this is only here to make the compiler happy. */
+#define _GNU_SOURCE
+
 #include <stdbool.h>
 
 #include <SDL.h>
