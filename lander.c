@@ -25,7 +25,6 @@
 #define GRAVITY 16.2f
 #define ANIM_RATE 15
 #define ANIM_TIME (TICKRATE / ANIM_RATE)
-#define NUM_FRAMES 3
 
 #define RTOD(x) ((x) * 180 / M_PI)
 #define CMP_ZERO(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
@@ -42,7 +41,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 		++l->anim_timer;
 		if (l->anim_timer == ANIM_TIME) {
 			++l->anim_frame;
-			l->anim_frame %= NUM_FRAMES;
+			l->anim_frame %= l->sprite_sheet->sheet_width - 1;
 			l->anim_timer = 0;
 
 			l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.25f + 1.0f) * 10.0f / TICKRATE : 0.0f;
@@ -68,13 +67,13 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	int collision = ML2_Map_doCollision(l->map, &collision_rect, &collision_rect_old);
 	if (collision & ML2_MAP_COLLIDED_X) {
 		l->pos_x -= l->vel_x / TICKRATE;
-		l->vel_fuel_x /= 2;
+		l->vel_fuel_x /= 2.0f;
 	}
 	
 	if (collision & ML2_MAP_COLLIDED_Y) {
 		l->pos_y -= l->vel_y / TICKRATE;
-		l->vel_fuel_y /= 2;
-		l->vel_grav = 0;
+		l->vel_fuel_y /= 2.0f;
+		l->vel_grav = 0.0f;
 	}
 	
 	return interval;
@@ -100,8 +99,8 @@ void Lander_destroy(Lander *l) {
 }
 
 void Lander_reset(Lander *l) {
-	l->pos_x = 80;
-	l->pos_y = 100;
+	l->pos_x = 80.0f;
+	l->pos_y = 100.0f;
 	l->vel_x = 0.0f;
 	l->vel_y = 0.0f;
 	l->vel_fuel_x = 0.0f;
@@ -109,7 +108,7 @@ void Lander_reset(Lander *l) {
 	l->fuel_level = 1000.0f;
 	l->vel_grav = 0.0f;
 	l->speed = 0.0f;
-	l->angle = M_PI / 2;
+	l->angle = M_PI / 2.0f;
 	l->anim_frame = 0;
 	l->anim_timer = 0;
 }
@@ -125,7 +124,7 @@ void Lander_render(Lander *l, SDL_Point *camera_pos) {
 		.h = LANDER_HEIGHT
 	};
 	
-	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->fuel_level > 0 ? l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1) : 0);
+	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->fuel_level > 0.0f ? l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1) : 0);
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.
 	 * RenderCopyEx takes an angle in degrees and rotates clockwise,
