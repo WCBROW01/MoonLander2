@@ -16,7 +16,6 @@ typedef struct  {
 	SDL_Texture *texture;
 	int tile_width, tile_height;
 	int sheet_width, sheet_height;
-	int num_tiles;
 } TileSheet;
 
 // Takes a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.

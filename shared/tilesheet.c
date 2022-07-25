@@ -32,8 +32,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 			.tile_width = tile_width,
 			.tile_height = tile_height,
 			.sheet_width = tilesheet_width / tile_width,
-			.sheet_height = tilesheet_height / tile_height,
-			.num_tiles = tilesheet_width * tilesheet_height
+			.sheet_height = tilesheet_height / tile_height
 		};
 	}
 
@@ -50,8 +49,9 @@ void TileSheet_destroy(TileSheet *tilesheet) {
 /* Creates a rectangle representing the position of a given tile.
  * If an index greater than the last tile is given, a zero-value rectangle will be returned. */
 SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index) {
-	if (!tilesheet || index >= tilesheet->num_tiles) return (SDL_Rect) {0};
-	else {
+	if (!tilesheet || index >= tilesheet->sheet_width * tilesheet->sheet_height) {
+		return (SDL_Rect) {0};
+	} else {
 		div_t tile = div(index, tilesheet->sheet_width);
 		return (SDL_Rect) {
 			.x = tile.rem * tilesheet->tile_width,
