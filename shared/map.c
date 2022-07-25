@@ -158,7 +158,7 @@ int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old) 
 				collider.y += r->y - r->y % 16;
 				if (SDL_HasIntersection(r, &collider)) {
 					int result = 0;
-					if (!r_old) result |= ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y;
+					if (!r_old) return ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y;
 					if (COLLIDED_LEFT || COLLIDED_RIGHT) result |= ML2_MAP_COLLIDED_X;
 					if (COLLIDED_BOTTOM || COLLIDED_TOP) result |= ML2_MAP_COLLIDED_Y;
 					return result;
