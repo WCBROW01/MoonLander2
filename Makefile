@@ -1,10 +1,10 @@
-game_src = $(wildcard *.c)
+game_src = $(wildcard src/*.c)
 game_obj = $(game_src:.c=.o)
 
-lib_src = $(wildcard shared/*.c)
+lib_src = $(wildcard src/shared/*.c)
 lib_obj = $(lib_src:.c=.o)
 
-CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Ishared -fpic
+CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Isrc/shared -fpic
 LDFLAGS = `sdl2-config --libs`
 
 moonlander: $(game_obj) libML2.a
