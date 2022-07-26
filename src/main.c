@@ -114,13 +114,6 @@ static void render_title(SDL_Texture *title) {
 	SDL_RenderCopy(renderer, title, NULL, &title_rect);
 }
 
-static void renderbg(void) {
-	SDL_Rect bg = {0, 0, screen_w, screen_h};
-
-	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-	SDL_RenderFillRect(renderer, &bg);
-}
-
 static SDL_Point get_camera_pos(const SDL_Point *player_pos) {
 	SDL_Point camera_pos = {
 		player_pos->x - screen_w / 2,
@@ -236,7 +229,10 @@ static void game_loop(void) {
 			}
 		}
 
-		renderbg();
+		// Render black background
+		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderClear(renderer);
+		
 		SDL_Point lander_point = {l->pos_x, l->pos_y};
 		SDL_Point camera_pos = get_camera_pos(&lander_point);
 		ML2_Map_render(map, renderer, tiles, &camera_pos);
