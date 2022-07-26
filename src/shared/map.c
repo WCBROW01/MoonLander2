@@ -133,11 +133,6 @@ void ML2_Map_reload(ML2_Map *map, const char *path) {
 	ML2_Map_free(new);
 }
 
-#define COLLIDED_LEFT (r_old->x + r_old->w < collider.x && r->x + r->w >= collider.x)
-#define COLLIDED_RIGHT (r_old->x >= collider.x + collider.w && r->x < collider.x + collider.w)
-#define COLLIDED_TOP (r_old->y + r_old->h < collider.y && r->y + r->h >= collider.y)
-#define COLLIDED_BOTTOM (r_old->y >= collider.y + collider.h && r->y < collider.y + collider.h)
-
 // Returns whether the rectangle is currently colliding with a tile and the direction.
 int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old) {
 	struct {
@@ -157,10 +152,15 @@ int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old) 
 				collider.x += r->x - r->x % 16;
 				collider.y += r->y - r->y % 16;
 				if (SDL_HasIntersection(r, &collider)) {
-					int result = 0;
 					if (!r_old) return ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y;
-					if (COLLIDED_LEFT || COLLIDED_RIGHT) result |= ML2_MAP_COLLIDED_X;
-					if (COLLIDED_BOTTOM || COLLIDED_TOP) result |= ML2_MAP_COLLIDED_Y;
+					
+					bool collided_left = r_old->x + r_old->w < collider.x && r->x + r->w >= collider.x;
+					bool collided_right = r_old->x >= collider.x + collider.w && r->x < collider.x + collider.w;
+					bool collided_top = r_old->y + r_old->h < collider.y && r->y + r->h >= collider.y;
+					bool collided_bottom = r_old->y >= collider.y + collider.h && r->y < collider.y + collider.h;
+					int result = 0;
+					if (collided_left || collided_right) result |= ML2_MAP_COLLIDED_X;
+					if (collided_top || collided_bottom) result |= ML2_MAP_COLLIDED_Y;
 					return result;
 				}
 			}
