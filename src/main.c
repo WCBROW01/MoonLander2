@@ -22,7 +22,8 @@
 
 // Game state, may end up in a struct at some point.
 static SDL_Window *window;
-static int win_w, win_h, screen_w, screen_h;
+static int screen_w;
+static int screen_h;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
 static TileSheet *tiles;
@@ -40,7 +41,7 @@ void exit_game(void) {
 	SDL_Quit();
 }
 
-static void new_render_texture(void) {
+static void new_render_texture(int win_w, int win_h) {
 	double ratio = win_w > win_h ? (double) win_w / win_h : (double) win_h / win_w;
 	screen_w = win_w > win_h ? ratio * 240 : 240;
 	screen_h = win_w > win_h ? 240 : ratio * 240;
@@ -61,9 +62,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	win_w = 640;
-	win_h = 480;
-	SDL_CreateWindowAndRenderer(win_w, win_h, SDL_WINDOW_RESIZABLE, &window, &renderer);
+	SDL_CreateWindowAndRenderer(640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer);
 	if (!window || !renderer) {
 		fprintf(stderr, "SDL_CreateWindowAndRenderer: %s\n", SDL_GetError());
 		exit(1);
@@ -72,8 +71,8 @@ static void init_game(void) {
 	SDL_SetWindowTitle(window, "Moon Lander");
 	SDL_RenderSetVSync(renderer, 1);
 
-	// This texture will be used as a buffer for rendering.
-	new_render_texture();
+	// This texture will be used as a buffer for rendering,
+	new_render_texture(640, 480);
 
 	tiles = TileSheet_create("tiles.bmp", renderer, 16, 16);
 
@@ -90,6 +89,7 @@ static void init_game(void) {
 
 static void render_screen(void) {
 	SDL_SetRenderTarget(renderer, NULL);
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, render_texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
@@ -162,9 +162,7 @@ static void title_screen(void) {
 				break;
 			} else if (e.type == SDL_WINDOWEVENT) switch (e.window.event) {
 			case SDL_WINDOWEVENT_RESIZED:
-				win_w = e.window.data1;
-				win_h = e.window.data2;
-				new_render_texture();
+				new_render_texture(e.window.data1, e.window.data2);
 				break;
 			}
 		}
@@ -186,7 +184,6 @@ static void game_loop(void) {
 	Lander *l = Lander_create(renderer, map);
 	SDL_Event e;
 	bool quit = false;
-	bool using_mouse = false;
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
@@ -204,11 +201,9 @@ static void game_loop(void) {
 				l->fast = 1;
 				break;
 			case SDLK_LEFT:
-				using_mouse = false;
 				--l->turning;
 				break;
 			case SDLK_RIGHT:
-				using_mouse = false;
 				++l->turning;
 				break;
 			case SDLK_r:
@@ -229,32 +224,17 @@ static void game_loop(void) {
 				break;
 			} else if (e.type == SDL_WINDOWEVENT) switch (e.window.event) {
 			case SDL_WINDOWEVENT_RESIZED:
-				win_w = e.window.data1;
-				win_h = e.window.data2;
-				new_render_texture();
+				new_render_texture(e.window.data1, e.window.data2);
 				break;
-			} else if (e.type == SDL_MOUSEMOTION) {
-				using_mouse = true;
 			}
-		}
-		
-		SDL_Point lander_point = {l->pos_x, l->pos_y};
-		SDL_Point camera_pos = get_camera_pos(&lander_point);
-		
-		if (using_mouse) {
-			int mouse_x, mouse_y;
-			SDL_GetMouseState(&mouse_x, &mouse_y);
-			mouse_x = mouse_x / ((float) win_w / screen_w);
-			mouse_y = screen_h - mouse_y / ((float) win_h / screen_h);
-			int lander_screen_x = lander_point.x - camera_pos.x + LANDER_WIDTH / 2;
-			int lander_screen_y = lander_point.y - camera_pos.y + LANDER_HEIGHT / 2;
-			l->angle = SDL_atan2f(mouse_y - lander_screen_y, mouse_x - lander_screen_x);
 		}
 
 		// Render black background
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(renderer);
 		
+		SDL_Point lander_point = {l->pos_x, l->pos_y};
+		SDL_Point camera_pos = get_camera_pos(&lander_point);
 		ML2_Map_render(map, renderer, tiles, &camera_pos);
 		Lander_render(l, &camera_pos);
 		render_hud(l->speed, l->fuel_level);
