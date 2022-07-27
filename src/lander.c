@@ -19,8 +19,6 @@
 #include "lander.h"
 #include "map.h"
 
-#define LANDER_WIDTH 16
-#define LANDER_HEIGHT 13
 #define ACCEL 50.0f
 #define TICKRATE 250
 #define MS_PER_TICK (1000 / TICKRATE)

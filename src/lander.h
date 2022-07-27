@@ -12,6 +12,9 @@
 #include "tilesheet.h"
 #include "map.h"
 
+#define LANDER_WIDTH 16
+#define LANDER_HEIGHT 13
+
 typedef struct {
 	SDL_Renderer *renderer;
 	TileSheet *sprite_sheet;
