@@ -25,7 +25,6 @@ static SDL_Window *window;
 static int win_w, win_h, screen_w, screen_h;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
-static TileSheet *tiles;
 static Font *font;
 static ML2_Map *map;
 
@@ -33,7 +32,6 @@ static ML2_Map *map;
  * so it will never return. */
 void exit_game(void) {
 	ML2_Map_free(map);
-	TileSheet_destroy(tiles);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -74,9 +72,7 @@ static void init_game(void) {
 
 	// This texture will be used as a buffer for rendering.
 	new_render_texture();
-
-	tiles = TileSheet_create("tiles.bmp", renderer, 16, 16);
-
+	
 	font = Font_create("font.bmp", renderer);
 	if (!font) {
 		fprintf(stderr, "Font_create: %s\n", SDL_GetError());
