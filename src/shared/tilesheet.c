@@ -16,7 +16,6 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 	// 0x00FF00 will be used as a key for transparency.
 	SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_FreeSurface(surface);
 	if (!texture) return NULL;
 	
 	TileSheet *tilesheet = SDL_malloc(sizeof(TileSheet));
@@ -28,6 +27,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 		int tilesheet_width, tilesheet_height;
 		SDL_QueryTexture(texture, NULL, NULL, &tilesheet_width, &tilesheet_height);
 		*tilesheet = (TileSheet) {
+			.surface = surface,
 			.texture = texture,
 			.tile_width = tile_width,
 			.tile_height = tile_height,
@@ -42,6 +42,7 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 // Frees all the resources for a tilesheet.
 void TileSheet_destroy(TileSheet *tilesheet) {
 	if (!tilesheet) return;
+	SDL_FreeSurface(tilesheet->surface);
 	SDL_DestroyTexture(tilesheet->texture);
 	SDL_free(tilesheet);
 }

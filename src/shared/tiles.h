@@ -22,10 +22,22 @@ enum tile {
 	TILE_ROCK_1,
 	TILE_ROCK_2,
 	TILE_ROCK_3,
-	TILE_EARTH,
+	TILE_PLANET,
 	TILE_STARS,
-	TILE_STARS_EARTH,
+	TILE_STARS_PLANET,
 	TILE_COUNT
+};
+
+enum builtin_tilesheet {
+	TILESHEET_CUSTOM,
+	TILESHEET_MOON,
+	TILESHEET_COUNT
+};
+
+static_assert(TILESHEET_COUNT == 2, "Exhaustive handling of tilesets in TILESHEET_PATHS");
+
+static const char *TILESHEET_PATHS[TILESHEET_COUNT] = {
+	[TILESHEET_MOON] = "tiles/moon.bmp"
 };
 
 static_assert(TILE_COUNT == 8, "Exhaustive handling of tiles in TILE_COLLISION_BOXES");

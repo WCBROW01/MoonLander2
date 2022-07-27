@@ -7,7 +7,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <errno.h>
 
 #include <SDL.h>
@@ -15,13 +14,6 @@
 #include "tilesheet.h"
 #include "tiles.h"
 #include "map.h"
-
-struct ML2_Map {
-	char sig[4];
-	uint32_t rev;
-	uint32_t width, height;
-	uint8_t data[];
-};
 
 /* Load a map from memory. Essentially just a validity check and a cast,
  * but better than doing this yourself. Will set the SDL error state and
@@ -41,7 +33,7 @@ ML2_Map *ML2_Map_loadFromMem(void *src) {
 /* Load the contents of a map file into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
-ML2_Map *ML2_Map_loadFromFile(const char *path) {
+ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 	FILE *map_file = fopen(path, "rb");
 	if (!map_file) {
 		SDL_SetError("Failed to open map file %s: %s", path, strerror(errno));
@@ -57,6 +49,37 @@ ML2_Map *ML2_Map_loadFromFile(const char *path) {
 		SDL_SetError("%s is an invalid map file.", path);
 		fclose(map_file);
 		return NULL;
+	}
+	
+	// Load tilesheet (added in revision 2, custom sheets not supported yet)
+	if (map_header.rev < 2) { // revision 1 assumes the moon sheet and black bg
+		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
+		map_header.tiles = TileSheet_create(TILESHEET_PATHS[TILESHEET_MOON], renderer, 16, 16);
+	} else {
+		if (fread(&map_header.bgcolor, 1, 4, map_file) != 4) { // get bg color
+			SDL_SetError("%s is an invalid map file.", path);
+			fclose(map_file);
+			return NULL;
+		}
+	
+		Uint8 tilesheet_enum;
+		if (fread(&tilesheet_enum, 1, 1, map_file) < 1) {
+			SDL_SetError("%s is an invalid map file.", path);
+			fclose(map_file);
+			return NULL;
+		}
+		
+		if (tilesheet_enum) {
+			if (tilesheet_enum >= TILESHEET_COUNT) {
+				SDL_SetError("%s contains an invalid tilesheet.", path);
+				fclose(map_file);
+				return NULL;
+			} else map_header.tiles = TileSheet_create(TILESHEET_PATHS[tilesheet_enum], renderer, 16, 16);
+		} else {
+			SDL_SetError("Custom tilesheets are not supported yet.");
+			fclose(map_file);
+			return NULL;
+		}
 	}
 	
 	// Allocate memory for map
@@ -86,6 +109,7 @@ ML2_Map *ML2_Map_loadFromFile(const char *path) {
 
 // Currently only calls free, here just in case it is needed later.
 void ML2_Map_free(ML2_Map *map) {
+	TileSheet_destroy(map->tiles);
 	SDL_free(map);
 }
 
@@ -93,9 +117,9 @@ void ML2_Map_free(ML2_Map *map) {
  * those coordinates. Returns the type of tile, and if flip is non-null,
  * it will be filled with information on what direction the tile should
  * be flipped. This value is directly usable with RenderCopyEx. */
-int ML2_Map_getTile(ML2_Map *map, uint32_t x, uint32_t y, int *flip) {
+int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip) {
 	if (!map || x >= map->width || y >= map->height) return -1;
-	uint8_t tile_data = map->data[y * map->width + x];
+	Uint8 tile_data = map->data[y * map->width + x];
 	if (flip) *flip = tile_data >> 6;
 	return tile_data & 63;
 }
@@ -107,10 +131,7 @@ void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h) {
 }
 
 // Render map onto renderer with a given tileset and camera position.
-void ML2_Map_render(
-	ML2_Map *map, SDL_Renderer *renderer,
-	TileSheet *tiles, SDL_Point *camera_pos
-) {
+void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
 	int render_w, render_h;
 	SDL_RenderGetLogicalSize(renderer, &render_w, &render_h);
 	if (!render_w || !render_h)
@@ -120,17 +141,11 @@ void ML2_Map_render(
 		for (int x = camera_pos->x / 16; x <= (camera_pos->x + render_w) / 16; ++x) {
 			int flip = 0;
 			int tile = ML2_Map_getTile(map, x, y, &flip);
-			SDL_Rect src = TileSheet_getTileRect(tiles, tile);
+			SDL_Rect src = TileSheet_getTileRect(map->tiles, tile);
 			SDL_Rect dst = {x * 16 - camera_pos->x, render_h - y * 16 + camera_pos->y - 16, 16, 16};
-			SDL_RenderCopyEx(renderer, tiles->texture, &src, &dst, 0, NULL, flip);
+			SDL_RenderCopyEx(renderer, map->tiles->texture, &src, &dst, 0, NULL, flip);
 		}
 	}
-}
-
-void ML2_Map_reload(ML2_Map *map, const char *path) {
-	ML2_Map *new = ML2_Map_loadFromFile(path);
-	if (new) memcpy(map, new, sizeof(ML2_Map) + map->width * map->height);
-	ML2_Map_free(new);
 }
 
 // Returns whether the rectangle is currently colliding with a tile and the direction.

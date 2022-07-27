@@ -12,7 +12,8 @@
 extern "C" {
 #endif
 
-typedef struct  {
+typedef struct {
+	SDL_Surface *surface;
 	SDL_Texture *texture;
 	int tile_width, tile_height;
 	int sheet_width, sheet_height;

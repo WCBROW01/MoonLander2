@@ -83,7 +83,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	map = ML2_Map_loadFromFile("test3.ml2");
+	map = ML2_Map_loadFromFile("test3.ml2", renderer);
 
 	atexit(exit_game);
 }
@@ -194,9 +194,6 @@ static void game_loop(void) {
 			case SDLK_ESCAPE:
 				quit = true;
 				break;
-			case SDLK_F5:
-				ML2_Map_reload(map, "test3.ml2");
-				break;
 			case SDLK_SPACE:
 				l->state = 1;
 				break;
@@ -251,11 +248,13 @@ static void game_loop(void) {
 			l->angle = SDL_atan2f(mouse_y - lander_screen_y, mouse_x - lander_screen_x);
 		}
 
+#define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a
+
 		// Render black background
-		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_SetRenderDrawColor(renderer, UNPACK_COLOR(map->bgcolor));
 		SDL_RenderClear(renderer);
 		
-		ML2_Map_render(map, renderer, tiles, &camera_pos);
+		ML2_Map_render(map, renderer, &camera_pos);
 		Lander_render(l, &camera_pos);
 		render_hud(l->speed, l->fuel_level);
 

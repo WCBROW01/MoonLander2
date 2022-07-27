@@ -8,8 +8,6 @@
 		- It does not need to run on everything that the game does, it can be an optional component.
 
 - Add the following to the map file spec:
-	- Customizable background color (for sky, space, etc.)
-	- Switchable tilesets
-	- Embedded tilesheets
+	- Embedded tilesheets (in progress)
 	- Tile attributes (will increase size)
 	- Use extra bits from this addition to increase tile limit (to 256?)
