@@ -51,6 +51,11 @@ ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 		return NULL;
 	}
 	
+	// Fix byte order of header
+	map_header.rev = SDL_SwapLE32(map_header.rev);
+	map_header.width = SDL_SwapLE32(map_header.width);
+	map_header.height = SDL_SwapLE32(map_header.height);
+	
 	// Load tilesheet (added in revision 2, custom sheets not supported yet)
 	if (map_header.rev < 2) { // revision 1 assumes the moon sheet and black bg
 		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
