@@ -11,6 +11,8 @@ Why did I decide to make this? I have no idea. The first project is just a meme 
 - [x] It will have a larger more detailed board, with real terrain. (maybe procedurally generated?)
 - [x] The camera will either change size as you get higher (akin to the Atari game), or scroll.
 - [ ] Just generally act more like the Atari lunar lander game.
+- [ ] Run on a wide variety of platforms.
+- [ ] Include a map editor. (either internal or external)
 
 Regardless, this is mostly an excuse for me to do some graphics programming, so don’t actually expect any of this to be here.
 
@@ -26,7 +28,7 @@ The font currently in use is [Public Pixel Font](https://ggbot.itch.io/public-pi
 
 To build, you only need to install SDL 2 and run `make`
 
-On Linux or macOS, you can get this from your package manager. Instructions for Windows will be published later.
+On Linux or macOS, you can get this from your package manager. Windows builds using MSYS2 and MinGW-w64 have been successfully created and require no modifications to the source code.
 
 Example for Debian/Ubuntu:
 
