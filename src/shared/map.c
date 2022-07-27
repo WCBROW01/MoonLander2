@@ -50,6 +50,13 @@ ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 		fclose(map_file);
 		return NULL;
 	}
+
+#if SDL_BYTEORDER != SDL_LIL_ENDIAN
+	// Fix byte order of header
+	map_header.rev = SDL_SwapLE32(map_header.rev);
+	map_header.width = SDL_SwapLE32(map_header.width);
+	map_header.height = SDL_SwapLE32(map_header.height);
+#endif
 	
 	// Fix byte order of header
 	map_header.rev = SDL_SwapLE32(map_header.rev);
