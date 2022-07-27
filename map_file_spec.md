@@ -29,12 +29,14 @@ Byte 20 of the header will determine the tilesheet that the map uses. If this by
 ## Custom tilesheets
 
 Custom tilesheets are stored as a standard Windows bitmap (of any pixel format) directly after the end of the header data, such that it may be loaded in directly after the header.
+However, before the bitmap data begins, you must provide the width and height of a single tile, so two unsigned little-endian 32-bit integers denoting the width and height of a tile (in that order) must be present in bytes 21-28.
 
 ## Map Data
 
 Map data is currently dead simple. Tiles are stored as a row-major array, with each tile being 1 byte long. This is subject to change, as compression may be added or tile length may be extended.
 
 The most significant bit of the tile denotes whether it is vertically flipped, and the second most significant bit denotes whether it is horizontally flipped, leaving 6 bits to denote what type of tile it is.
+If shifted, these rotation bits can be used as an SDL_RendererFlip value.
 This means you are currently able to address up to 64 individual types of tiles, each containing a parameter for direction flipped.
 
 The coordinate (0, 0) can be found at the bottom left of the map, matching the coordinate system for Moon Lander 2, so expanding a map can be done with a trivial for loop, possibly using memcpy to speed up the process. This also makes the format easier to deal with for other types of 2D games, like platformers.
