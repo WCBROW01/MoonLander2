@@ -24,14 +24,16 @@ Bytes 8-15 of the header contain two little-endian unsigned 32-bit integers deno
 
 Bytes 16-23 contain the coordinates starting position of the player on the map as two little-endian unsigned 32-bit integers.
 
-Bytes 24-27 of the header contain a background color for the map in the form of an RGBA color.
+Bytes 24-27 of the header contain the amount of fuel the player will start with as a little-endian unsigned 32-bit integer.
 
-Byte 28 of the header will determine the tilesheet that the map uses. If this byte is 0, the tilesheet is pulled from within the map file. Otherwise, one of the built in tilesheets is used.
+Bytes 28-32 of the header contain a background color for the map in the form of an RGBA color.
+
+Byte 33 of the header will determine the tilesheet that the map uses. If this byte is 0, the tilesheet is pulled from within the map file. Otherwise, one of the built in tilesheets is used.
 
 ## Custom tilesheets
 
 Custom tilesheets are stored as a standard Windows bitmap (of any pixel format) directly after the end of the header data, such that it may be loaded in directly after the header.
-However, before the bitmap data begins, you must provide the width and height of a single tile, so two unsigned little-endian 32-bit integers denoting the width and height of a tile (in that order) must be present in bytes 29-36.
+However, before the bitmap data begins, you must provide the width and height of a single tile, so two unsigned little-endian 32-bit integers denoting the width and height of a tile (in that order) must be present in bytes 33-40.
 
 ## Map Data
 

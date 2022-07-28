@@ -105,7 +105,7 @@ void Lander_reset(Lander *l) {
 	l->vel_y = 0.0f;
 	l->vel_fuel_x = 0.0f;
 	l->vel_fuel_y = 0.0f;
-	l->fuel_level = 1000.0f;
+	l->fuel_level = l->map->start_fuel;
 	l->vel_grav = 0.0f;
 	l->speed = 0.0f;
 	l->angle = M_PI / 2.0f;

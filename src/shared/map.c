@@ -35,7 +35,7 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
 		map_header.tiles = TileSheet_create(TILESHEET_PATHS[TILESHEET_MOON], renderer, 16, 16);
 	} else { // Load revision 2 additions
-		if (SDL_RWread(src, &map_header.start_x, sizeof(Uint32), 2) != 2) { // get start position
+		if (SDL_RWread(src, &map_header.start_x, sizeof(Uint32), 3) != 3) { // get start position, fuel
 			SDL_SetError("Attempted to load an invalid map.");
 			goto done;
 		}
