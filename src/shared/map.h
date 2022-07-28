@@ -26,11 +26,17 @@ typedef struct {
 	Uint8 data[];
 } ML2_Map;
 
-/* Load a map from memory. Essentially just a validity check and a cast,
- * but better than doing this yourself. Will set the SDL error state and
- * return NULL if the check fails. This memory should be freed the same
- * way it was acquired. */
-ML2_Map *ML2_Map_loadFromMem(void *src);
+ /* Load the contents of a map from RWops into memory so it can be used in-game.
+ * If there is an error or the loaded map is invalid, the SDL error state
+ * will be set and a null pointer will be returned. */
+ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *renderer);
+
+/* Load the contents of a map from a block of memory so it can be used in-game.
+ * This will allocate more memory, since the representation of a map in memory
+ * is not strictly a dump of the map.
+ * If there is an error or the loaded map is invalid, the SDL error state
+ * will be set and a null pointer will be returned. */
+ML2_Map *ML2_Map_loadFromMem(void *src, int size, SDL_Renderer *renderer);
 
 /* Load the contents of a map file into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
