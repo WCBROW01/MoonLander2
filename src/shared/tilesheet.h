@@ -19,7 +19,13 @@ typedef struct {
 	int sheet_width, sheet_height;
 } TileSheet;
 
-// Takes a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.
+// Takes an SDL Surface, and the width and height of each tile, and creates a tilesheet.
+TileSheet *TileSheet_createFromSurface(SDL_Surface *surface, SDL_Renderer *renderer, int tile_width, int tile_height);
+
+// Takes a Windows bitmap image from RWops, and the width and height of each tile, and creates a tilesheet.
+TileSheet *TileSheet_createFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *renderer, int tile_width, int tile_height);
+
+// Takes the file path of a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.
 TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int tile_width, int tile_height);
 
 // Frees all the resources for a tilesheet.

@@ -9,9 +9,8 @@
 
 #include "tilesheet.h"
 
-// Takes a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.
-TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int tile_width, int tile_height) {
-	SDL_Surface *surface = SDL_LoadBMP(file_path);
+// Takes an SDL Surface, and the width and height of each tile, and creates a tilesheet.
+TileSheet *TileSheet_createFromSurface(SDL_Surface *surface, SDL_Renderer *renderer, int tile_width, int tile_height) {
 	if (!surface) return NULL;
 	// 0x00FF00 will be used as a key for transparency.
 	SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
@@ -37,6 +36,18 @@ TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int t
 	}
 
 	return tilesheet;
+}
+
+// Takes a Windows bitmap image from RWops, and the width and height of each tile, and creates a tilesheet.
+TileSheet *TileSheet_createFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *renderer, int tile_width, int tile_height) {
+	SDL_Surface *surface = SDL_LoadBMP_RW(src, freesrc);
+	return TileSheet_createFromSurface(surface, renderer, tile_width, tile_height);
+}
+
+// Takes the file path of a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.
+TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int tile_width, int tile_height) {
+	SDL_Surface *surface = SDL_LoadBMP(file_path);
+	return TileSheet_createFromSurface(surface, renderer, tile_width, tile_height);
 }
 
 // Frees all the resources for a tilesheet.

@@ -79,7 +79,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	map = ML2_Map_loadFromFile("test3.ml2", renderer);
+	map = ML2_Map_loadFromFile("test4.ml2", renderer);
 
 	atexit(exit_game);
 }

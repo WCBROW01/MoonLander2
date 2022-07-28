@@ -22,14 +22,16 @@ The first 8 bytes of the header will always contain this information and no chan
 
 Bytes 8-15 of the header contain two little-endian unsigned 32-bit integers denoting the width and height of the map by tile.
 
-Bytes 16-19 of the header contain a background color for the map in the form of an RGBA color.
+Bytes 16-23 contain the coordinates starting position of the player on the map as two little-endian unsigned 32-bit integers.
 
-Byte 20 of the header will determine the tilesheet that the map uses. If this byte is 0, the tilesheet is pulled from within the map file. Otherwise, one of the built in tilesheets is used.
+Bytes 24-27 of the header contain a background color for the map in the form of an RGBA color.
+
+Byte 28 of the header will determine the tilesheet that the map uses. If this byte is 0, the tilesheet is pulled from within the map file. Otherwise, one of the built in tilesheets is used.
 
 ## Custom tilesheets
 
 Custom tilesheets are stored as a standard Windows bitmap (of any pixel format) directly after the end of the header data, such that it may be loaded in directly after the header.
-However, before the bitmap data begins, you must provide the width and height of a single tile, so two unsigned little-endian 32-bit integers denoting the width and height of a tile (in that order) must be present in bytes 21-28.
+However, before the bitmap data begins, you must provide the width and height of a single tile, so two unsigned little-endian 32-bit integers denoting the width and height of a tile (in that order) must be present in bytes 29-36.
 
 ## Map Data
 
@@ -41,17 +43,22 @@ This means you are currently able to address up to 64 individual types of tiles,
 
 The coordinate (0, 0) can be found at the bottom left of the map, matching the coordinate system for Moon Lander 2, so expanding a map can be done with a trivial for loop, possibly using memcpy to speed up the process. This also makes the format easier to deal with for other types of 2D games, like platformers.
 
-## Visualization of file structure as a struct
+## Reference-implementation of the spec
 
-If you were to use this file in a program, you could very easily copy the file into memory and use it as-is with a struct similar to this:
+The Moon Lander 2 program uses a struct similar to this:
 
 ```c
-struct map {
+typedef struct {
 	char sig[4];
-	uint32_t rev;
-	uint32_t width, height;
-	uint8_t data[];
-};
+	Uint32 rev;
+	Uint32 width, height;
+	Uint32 start_x, start_y;
+	SDL_Color bgcolor;
+	TileSheet *tiles;
+	Uint8 data[];
+} ML2_Map;
 ```
 
-All you would need to do is allocate enough memory for the file and copy it, or memory map it.
+All header data unchanged from revision 1 is dumped directly into the struct.
+Start position, color, and the tilesheet are selectively loaded from the file, depending on whether a revision 1 map or a revision 2 map is loaded.
+If a revision 1 map is loaded, all default values from before revision 2 was finalized are used in place of the new values.

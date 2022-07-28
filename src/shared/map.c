@@ -16,8 +16,6 @@
  /* Load the contents of a map from RWops into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
-
-// TODO: Implement embedded tilesheet loading.
 ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *renderer) {
 	ML2_Map *map = NULL;
 
@@ -30,40 +28,52 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 		SDL_SetError("Attempted to load an invalid map.");
 		goto done;
 	}
-
-#if SDL_BYTEORDER != SDL_LIL_ENDIAN
-	// Fix byte order of header
-	map_header.rev = SDL_SwapLE32(map_header.rev);
-	map_header.width = SDL_SwapLE32(map_header.width);
-	map_header.height = SDL_SwapLE32(map_header.height);
-#endif
 	
-	// Load tilesheet (added in revision 2, custom sheets not supported yet)
-	if (map_header.rev < 2) { // revision 1 assumes the moon sheet and black bg
+	if (map_header.rev < 2) { // Use old hardcoded values for revision 1 maps.
+		map_header.start_x = 80;
+		map_header.start_y = 100;
 		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
 		map_header.tiles = TileSheet_create(TILESHEET_PATHS[TILESHEET_MOON], renderer, 16, 16);
-	} else {
+	} else { // Load revision 2 additions
+		if (SDL_RWread(src, &map_header.start_x, sizeof(Uint32), 2) != 2) { // get start position
+			SDL_SetError("Attempted to load an invalid map.");
+			goto done;
+		}
+	
 		if (SDL_RWread(src, &map_header.bgcolor, 1, 4) != 4) { // get bg color
 			SDL_SetError("Attempted to load an invalid map.");
 			goto done;
 		}
 	
 		Uint8 tilesheet_enum;
-		if (SDL_RWread(src, &tilesheet_enum, 1, 1) < 1) {
+		if (SDL_RWread(src, &tilesheet_enum, 1, 1) < 1) { // get tilesheet
 			SDL_SetError("Attempted to load an invalid map.");
 			goto done;
 		}
 		
-		if (tilesheet_enum) {
+		if (tilesheet_enum) { // use built-in sheet
 			if (tilesheet_enum >= TILESHEET_COUNT) {
 				SDL_SetError("Map contains an invalid tilesheet.");
 				goto done;
 			} else map_header.tiles = TileSheet_create(TILESHEET_PATHS[tilesheet_enum], renderer, 16, 16);
-		} else {
-			SDL_SetError("Custom tilesheets are not supported yet.");
-			goto done;
+		} else { // load embedded sheet
+			struct {Uint32 w, h;} dim;
+			if (SDL_RWread(src, &dim, sizeof(Uint32), 2) != 8) {
+				SDL_SetError("Map contains an invalid tilesheet.");
+				goto done;
+			};
+			map_header.tiles = TileSheet_createFromRWops(src, 0, renderer, dim.w, dim.h);
 		}
 	}
+	
+#if SDL_BYTEORDER != SDL_LIL_ENDIAN
+	// Fix byte order of header
+	map_header.rev = SDL_SwapLE32(map_header.rev);
+	map_header.width = SDL_SwapLE32(map_header.width);
+	map_header.height = SDL_SwapLE32(map_header.height);
+	map_header.start_x = SDL_SwapLE32(map_header.start_x);
+	map_header.start_y = SDL_SwapLE32(map_header.start_y);
+#endif
 	
 	// Allocate memory for map
 	size_t map_size = map_header.width * map_header.height;
