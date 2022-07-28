@@ -54,7 +54,7 @@ typedef struct {
 	char sig[4];
 	Uint32 rev;
 	Uint32 width, height;
-	Uint32 start_x, start_y;
+	Uint32 start_x, start_y, start_fuel;
 	SDL_Color bgcolor;
 	TileSheet *tiles;
 	Uint8 data[];
