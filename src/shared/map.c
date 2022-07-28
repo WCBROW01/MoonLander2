@@ -4,9 +4,6 @@
  * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
-
-#include <stdio.h>
-
 #include <SDL.h>
 
 #include "tilesheet.h"
@@ -66,7 +63,7 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 			} else map_header.tiles = TileSheet_create(TILESHEET_PATHS[tilesheet_enum], renderer, 16, 16);
 		} else { // load embedded sheet
 			struct {Uint32 w, h;} dim;
-			if (SDL_RWread(src, &dim, sizeof(Uint32), 2) != 8) {
+			if (SDL_RWread(src, &dim, sizeof(Uint32), 2) != 2) {
 				SDL_SetError("Map contains an invalid tilesheet.");
 				goto done;
 			};
