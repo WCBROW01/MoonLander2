@@ -150,12 +150,6 @@ int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip) {
 	return tile_data & 63;
 }
 
-void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h) {
-	if (!map) return;
-	if (w) *w = map->width;
-	if (h) *h = map->height;
-}
-
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
 	int render_w, render_h;

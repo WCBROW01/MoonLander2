@@ -53,10 +53,6 @@ void ML2_Map_free(ML2_Map *map);
  * be flipped. This value is directly usable with RenderCopyEx. */
 int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip);
 
-// Puts dimensions of map into the w and h pointers.
-// Deprecated: map dimensions are now publicly exposed!
-void ML2_Map_getDim(ML2_Map *map, volatile int *w, volatile int *h);
-
 // Returns whether the rectangle is currently colliding with a tile and the direction.
 int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old);
 

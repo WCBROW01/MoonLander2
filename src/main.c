@@ -116,8 +116,8 @@ static SDL_Point get_camera_pos(const SDL_Point *player_pos) {
 		player_pos->y - screen_h / 2
 	};
 
-	int map_w, map_h;
-	ML2_Map_getDim(map, &map_w, &map_h);
+	int map_w = map->width;
+	int map_h = map->height;
 
 	if (camera_pos.x < 0) {
 		camera_pos.x = 0;
