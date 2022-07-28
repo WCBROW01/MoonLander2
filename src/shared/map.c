@@ -32,6 +32,7 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 	if (map_header.rev < 2) { // Use old hardcoded values for revision 1 maps.
 		map_header.start_x = 80;
 		map_header.start_y = 100;
+		map_header.start_fuel = 1000;
 		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
 		map_header.tiles = TileSheet_create(TILESHEET_PATHS[TILESHEET_MOON], renderer, 16, 16);
 	} else { // Load revision 2 additions
@@ -73,6 +74,7 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 	map_header.height = SDL_SwapLE32(map_header.height);
 	map_header.start_x = SDL_SwapLE32(map_header.start_x);
 	map_header.start_y = SDL_SwapLE32(map_header.start_y);
+	map_header.start_fuel = SDL_SwapLE32(map_header.start_fuel);
 #endif
 	
 	// Allocate memory for map
