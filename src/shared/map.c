@@ -33,6 +33,10 @@ ML2_Map *ML2_Map_loadFromMem(void *src) {
 /* Load the contents of a map file into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
+ 
+// TODO: Use goto for error handling.
+// TODO: Use RWops instead of FILE pointers.
+// TODO: Implement embedded tilesheet loading.
 ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 	FILE *map_file = fopen(path, "rb");
 	if (!map_file) {
@@ -57,11 +61,6 @@ ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 	map_header.width = SDL_SwapLE32(map_header.width);
 	map_header.height = SDL_SwapLE32(map_header.height);
 #endif
-	
-	// Fix byte order of header
-	map_header.rev = SDL_SwapLE32(map_header.rev);
-	map_header.width = SDL_SwapLE32(map_header.width);
-	map_header.height = SDL_SwapLE32(map_header.height);
 	
 	// Load tilesheet (added in revision 2, custom sheets not supported yet)
 	if (map_header.rev < 2) { // revision 1 assumes the moon sheet and black bg
@@ -149,12 +148,25 @@ void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos)
 	if (!render_w || !render_h)
 		SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
 	
-	for (int y = camera_pos->y / 16; y <= (camera_pos->y + render_h) / 16; ++y) {
-		for (int x = camera_pos->x / 16; x <= (camera_pos->x + render_w) / 16; ++x) {
+	for (
+		int y = camera_pos->y / map->tiles->tile_height;
+		y <= (camera_pos->y + render_h) / map->tiles->tile_height;
+		++y
+	) {
+		for (
+			int x = camera_pos->x / map->tiles->tile_width;
+			x <= (camera_pos->x + render_w) / map->tiles->tile_width;
+			++x
+		) {
 			int flip = 0;
 			int tile = ML2_Map_getTile(map, x, y, &flip);
 			SDL_Rect src = TileSheet_getTileRect(map->tiles, tile);
-			SDL_Rect dst = {x * 16 - camera_pos->x, render_h - y * 16 + camera_pos->y - 16, 16, 16};
+			SDL_Rect dst = {
+				.x = x * map->tiles->tile_width - camera_pos->x,
+				.y = render_h - 1 - y * map->tiles->tile_height + camera_pos->y - map->tiles->tile_height,
+				.w = map->tiles->tile_width,
+				.h = map->tiles->tile_height
+			};
 			SDL_RenderCopyEx(renderer, map->tiles->texture, &src, &dst, 0, NULL, flip);
 		}
 	}
@@ -163,32 +175,73 @@ void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos)
 // Returns whether the rectangle is currently colliding with a tile and the direction.
 int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old) {
 	struct {
+		SDL_Point point;
 		int tile;
 		int flip;
-	} possible_tiles[4];
+	} possible_tiles[4] = {
+		{.point = {r->x / map->tiles->tile_width, r->y / map->tiles->tile_width}},
+		{.point = {(r->x + r->w) / map->tiles->tile_width, r->y / map->tiles->tile_width}},
+		{.point = {r->x / map->tiles->tile_width, (r->y + r->h) / map->tiles->tile_width}},
+		{.point = {(r->x + r->w) / map->tiles->tile_width, (r->y + r->h) / map->tiles->tile_width}}
+	};
 
-	possible_tiles[0].tile = ML2_Map_getTile(map, r->x / 16, r->y / 16, &possible_tiles[0].flip);
-	possible_tiles[1].tile = ML2_Map_getTile(map, (r->x + r->w) / 16, r->y / 16, &possible_tiles[1].flip);
-	possible_tiles[2].tile = ML2_Map_getTile(map, r->x / 16, (r->y + r->h) / 16, &possible_tiles[2].flip);
-	possible_tiles[3].tile = ML2_Map_getTile(map, (r->x + r->w) / 16, (r->y + r->h) / 16, &possible_tiles[3].flip);
+	possible_tiles[0].tile = ML2_Map_getTile(
+		map,
+		possible_tiles[0].point.x,
+		possible_tiles[0].point.y,
+		&possible_tiles[0].flip
+	);
+	
+	possible_tiles[1].tile = ML2_Map_getTile(
+		map,
+		possible_tiles[1].point.x,
+		possible_tiles[1].point.y,
+		&possible_tiles[1].flip
+	);
+	
+	possible_tiles[2].tile = ML2_Map_getTile(
+		map,
+		possible_tiles[2].point.x,
+		possible_tiles[2].point.y,
+		&possible_tiles[2].flip
+	);
+	
+	possible_tiles[3].tile = ML2_Map_getTile(
+		map,
+		possible_tiles[3].point.x,
+		possible_tiles[3].point.y,
+		&possible_tiles[3].flip
+	);
 
 	for (int i = 0; i < 4; ++i) {
 		if (possible_tiles[i].tile != -1) {
-			for (int j = 0; j < 16 && !SDL_RectEmpty(&TILE_COLLISION_BOXES[possible_tiles[i].tile][j]); ++i) {
-				SDL_Rect collider = TILE_COLLISION_BOXES[possible_tiles[i].tile][j];
-				collider.x += r->x - r->x % 16;
-				collider.y += r->y - r->y % 16;
-				if (SDL_HasIntersection(r, &collider)) {
-					if (!r_old) return ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y;
-					
-					bool collided_left = r_old->x + r_old->w < collider.x && r->x + r->w >= collider.x;
-					bool collided_right = r_old->x >= collider.x + collider.w && r->x < collider.x + collider.w;
-					bool collided_top = r_old->y + r_old->h < collider.y && r->y + r->h >= collider.y;
-					bool collided_bottom = r_old->y >= collider.y + collider.h && r->y < collider.y + collider.h;
-					int result = 0;
-					if (collided_left || collided_right) result |= ML2_MAP_COLLIDED_X;
-					if (collided_top || collided_bottom) result |= ML2_MAP_COLLIDED_Y;
-					return result;
+			for (int y = 0; y < map->tiles->tile_height; ++y) {
+				for (int x = 0; x < map->tiles->tile_width; ++x) {
+					if (
+						TileSheet_getPixel(map->tiles, possible_tiles[i].tile, x, y) !=
+						SDL_MapRGB(map->tiles->surface->format, 0, 255, 0)
+					) {
+						SDL_Point collider = {
+							.x = possible_tiles[i].flip & SDL_FLIP_HORIZONTAL ?
+								possible_tiles[i].point.x * map->tiles->tile_width + (map->tiles->tile_width - 1 - x) :
+								possible_tiles[i].point.x * map->tiles->tile_width + x,
+							.y = possible_tiles[i].flip & SDL_FLIP_VERTICAL ?
+								possible_tiles[i].point.y * map->tiles->tile_height + y :
+								possible_tiles[i].point.y * map->tiles->tile_height + (map->tiles->tile_height - 1 - y)
+						};
+						
+						if (SDL_PointInRect(&collider, r)) {
+							if (!r_old) return ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y;
+							bool collided_left = r_old->x + r_old->w < collider.x && r->x + r->w >= collider.x;
+							bool collided_right = r_old->x >= collider.x && r->x < collider.x;
+							bool collided_top = r_old->y + r_old->h < collider.y && r->y + r->h >= collider.y;
+							bool collided_bottom = r_old->y >= collider.y && r->y < collider.y;
+							int result = 0;
+							if (collided_left || collided_right) result |= ML2_MAP_COLLIDED_X;
+							if (collided_top || collided_bottom) result |= ML2_MAP_COLLIDED_Y;
+							return result == 0 ? ML2_MAP_COLLIDED_X | ML2_MAP_COLLIDED_Y : result; // hack
+						}
+					}
 				}
 			}
 		}

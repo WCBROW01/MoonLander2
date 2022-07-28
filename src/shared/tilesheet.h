@@ -29,6 +29,9 @@ void TileSheet_destroy(TileSheet *tilesheet);
  * If an index greater than the last tile is given, a zero-value rectangle will be returned. */
 SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index);
 
+// Get the raw color data of a single pixel in a tile.
+Uint32 TileSheet_getPixel(TileSheet *tilesheet, int index, int x, int y);
+
 #ifdef __cplusplus
 }
 #endif

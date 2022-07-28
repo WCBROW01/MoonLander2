@@ -62,3 +62,31 @@ SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index) {
 		};
 	}
 }
+
+Uint32 TileSheet_getPixel(TileSheet *tilesheet, int index, int x, int y) {
+	if (!tilesheet || index >= tilesheet->tile_width * tilesheet->tile_height) return 0;
+
+	SDL_Rect tile_rect = TileSheet_getTileRect(tilesheet, index);
+	x += tile_rect.x;
+	y += tile_rect.y;
+	
+	int bpp = tilesheet->surface->format->BytesPerPixel;
+	Uint8 *p = (Uint8 *)tilesheet->surface->pixels + y * tilesheet->surface->pitch + x * bpp;
+	
+	switch (bpp) {
+	case 1:
+		return *p;
+	case 2:
+		return *(Uint16 *)p;
+	case 3:
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		return p[0] << 16 | p[1] << 8 | p[2];
+#else
+		return p[0] | p[1] << 8 | p[2] << 16;
+#endif
+	case 4:
+		return *(Uint32 *)p;
+	default:
+		return 0;
+	}
+}
