@@ -29,6 +29,13 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 		goto done;
 	}
 	
+#if SDL_BYTEORDER != SDL_LIL_ENDIAN
+	// Fix byte order of rev 1 header
+	map_header.rev = SDL_SwapLE32(map_header.rev);
+	map_header.width = SDL_SwapLE32(map_header.width);
+	map_header.height = SDL_SwapLE32(map_header.height);
+#endif
+	
 	if (map_header.rev < 2) { // Use old hardcoded values for revision 1 maps.
 		map_header.start_x = 80;
 		map_header.start_y = 100;
@@ -65,17 +72,14 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 			};
 			map_header.tiles = TileSheet_createFromRWops(src, 0, renderer, dim.w, dim.h);
 		}
-	}
-	
+		
 #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-	// Fix byte order of header
-	map_header.rev = SDL_SwapLE32(map_header.rev);
-	map_header.width = SDL_SwapLE32(map_header.width);
-	map_header.height = SDL_SwapLE32(map_header.height);
+	// Fix byte order of rev 2 header
 	map_header.start_x = SDL_SwapLE32(map_header.start_x);
 	map_header.start_y = SDL_SwapLE32(map_header.start_y);
 	map_header.start_fuel = SDL_SwapLE32(map_header.start_fuel);
 #endif
+	}
 	
 	// Allocate memory for map
 	size_t map_size = map_header.width * map_header.height;
