@@ -64,7 +64,7 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	// Make the lander wrap around the map horizontally
 	if (l->pos_x > l->map->width * l->map->tiles->tile_width)
 		l->pos_x -= l->map->width * l->map->tiles->tile_width;
-	else if (l->pos_x < 0)
+	else if (l->pos_x < -l->map->tiles->tile_width)
 		l->pos_x += l->map->width * l->map->tiles->tile_width;
 
 	SDL_Rect collision_rect = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
