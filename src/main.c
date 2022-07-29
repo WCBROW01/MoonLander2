@@ -117,13 +117,13 @@ static SDL_Point get_camera_pos(const SDL_Point *player_pos) {
 
 	if (camera_pos.x < 0) {
 		camera_pos.x = 0;
-	} else if (camera_pos.x > map->width * 16 - screen_w) {
+	} else if ((unsigned) camera_pos.x > map->width * 16 - screen_w) {
 		camera_pos.x = map->width * 16 - screen_w;
 	}
 
 	if (camera_pos.y < 0) {
 		camera_pos.y = 0;
-	} else if (camera_pos.y > map->height * 16 - screen_h) {
+	} else if ((unsigned) camera_pos.y > map->height * 16 - screen_h) {
 		camera_pos.y = map->height * 16 - screen_h;
 	}
 
