@@ -60,6 +60,12 @@ Uint32 Lander_physics(Uint32 interval, void *param) {
 	SDL_Rect collision_rect_old = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
 	l->pos_x += l->vel_x / TICKRATE;
 	l->pos_y += l->vel_y / TICKRATE;
+	
+	// Make the lander wrap around the map horizontally
+	if (l->pos_x > l->map->width * l->map->tiles->tile_width)
+		l->pos_x -= l->map->width * l->map->tiles->tile_width;
+	else if (l->pos_x < 0)
+		l->pos_x += l->map->width * l->map->tiles->tile_width;
 
 	SDL_Rect collision_rect = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
 	int collision = ML2_Map_doCollision(l->map, &collision_rect, &collision_rect_old);
