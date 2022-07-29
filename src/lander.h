@@ -8,7 +8,6 @@
 #ifndef MOONLANDER_LANDER_H
 #define MOONLANDER_LANDER_H
 
-#include <stdbool.h>
 #include "tilesheet.h"
 #include "map.h"
 
@@ -24,8 +23,8 @@ typedef struct {
 	float vel_grav, vel_fuel_x, vel_fuel_y, fuel_level;
 	char anim_frame, anim_timer;
 	char turning;
-	bool state : 1;
-	bool fast : 1;
+	SDL_bool state : 1;
+	SDL_bool fast : 1;
 } Lander;
 
 Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map);

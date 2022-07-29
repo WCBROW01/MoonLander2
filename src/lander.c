@@ -11,8 +11,6 @@
  * all source code is compliant with the ISO C11 standard. */
 #define _GNU_SOURCE
 
-#include <stdbool.h>
-
 #include <SDL.h>
 
 #include "tilesheet.h"

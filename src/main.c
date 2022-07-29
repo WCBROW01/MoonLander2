@@ -7,8 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <stdarg.h>
 
 #include <SDL.h>
 
@@ -28,8 +26,9 @@ static SDL_Texture *render_texture;
 static Font *font;
 static ML2_Map *map;
 
-/* This function frees all game memory and exits the program,
- * so it will never return. */
+/* This function frees all game memory in preparation to exit the program.
+ * It should be registered using atexit(), so you should never need to call it.
+ * If you want to exit the program early, use exit() like you normally would. */
 void exit_game(void) {
 	ML2_Map_free(map);
 	SDL_DestroyTexture(render_texture);
@@ -39,7 +38,7 @@ void exit_game(void) {
 }
 
 static void new_render_texture(void) {
-	double ratio = win_w > win_h ? (double) win_w / win_h : (double) win_h / win_w;
+	float ratio = win_w > win_h ? (float) win_w / win_h : (float) win_h / win_w;
 	screen_w = win_w > win_h ? ratio * 240 : 240;
 	screen_h = win_w > win_h ? 240 : ratio * 240;
 
@@ -141,17 +140,17 @@ static void title_screen(void) {
 
 	// Title screen
 	SDL_Event e;
-	bool quit = false;
-	bool title = false;
+	SDL_bool quit = SDL_FALSE;
+	SDL_bool title = SDL_FALSE;
 	while (!quit && !title){
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) quit = true;
+			if (e.type == SDL_QUIT) quit = SDL_TRUE;
 			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_ESCAPE:
-				quit = true;
+				quit = SDL_TRUE;
 				break;
 			case SDLK_RETURN:
-				title = true;
+				title = SDL_TRUE;
 				break;
 			} else if (e.type == SDL_WINDOWEVENT) switch (e.window.event) {
 			case SDL_WINDOWEVENT_RESIZED:
@@ -178,14 +177,14 @@ static void render_hud(float speed, float fuel) {
 static void game_loop(void) {
 	Lander *l = Lander_create(renderer, map);
 	SDL_Event e;
-	bool quit = false;
-	bool using_mouse = false;
+	SDL_bool quit = SDL_FALSE;
+	SDL_bool using_mouse = SDL_FALSE;
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) quit = true;
+			if (e.type == SDL_QUIT) quit = SDL_TRUE;
 			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_ESCAPE:
-				quit = true;
+				quit = SDL_TRUE;
 				break;
 			case SDLK_SPACE:
 				l->state = 1;
@@ -194,11 +193,11 @@ static void game_loop(void) {
 				l->fast = 1;
 				break;
 			case SDLK_LEFT:
-				using_mouse = false;
+				using_mouse = SDL_FALSE;
 				--l->turning;
 				break;
 			case SDLK_RIGHT:
-				using_mouse = false;
+				using_mouse = SDL_FALSE;
 				++l->turning;
 				break;
 			case SDLK_r:
@@ -224,7 +223,7 @@ static void game_loop(void) {
 				new_render_texture();
 				break;
 			} else if (e.type == SDL_MOUSEMOTION) {
-				using_mouse = true;
+				using_mouse = SDL_TRUE;
 			}
 		}
 		
