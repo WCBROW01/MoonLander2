@@ -172,7 +172,7 @@ void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos)
 			SDL_Rect src = TileSheet_getTileRect(map->tiles, tile);
 			SDL_Rect dst = {
 				.x = x * map->tiles->tile_width - camera_pos->x,
-				.y = render_h - 1 - y * map->tiles->tile_height + camera_pos->y - map->tiles->tile_height,
+				.y = render_h - y * map->tiles->tile_height + camera_pos->y - map->tiles->tile_height,
 				.w = map->tiles->tile_width,
 				.h = map->tiles->tile_height
 			};
