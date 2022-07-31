@@ -103,8 +103,8 @@ void Lander_destroy(Lander *l) {
 }
 
 void Lander_reset(Lander *l) {
-	l->pos_x = l->map->start_x;
-	l->pos_y = l->map->start_y;
+	l->pos_x = l->map->start_x * l->map->tiles->tile_width;
+	l->pos_y = l->map->start_y * l->map->tiles->tile_height;
 	l->vel_x = 0.0f;
 	l->vel_y = 0.0f;
 	l->vel_fuel_x = 0.0f;
