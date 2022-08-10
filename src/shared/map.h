@@ -13,19 +13,28 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Flags enum for collision result
+ */
 enum ML2_Map_CollisionAxis {
 	ML2_MAP_COLLIDED_X = 1,
 	ML2_MAP_COLLIDED_Y = 2
 };
 
+/**
+ * @brief Map data
+ */
 typedef struct {
-	char sig[4];
-	Uint32 rev;
-	Uint32 width, height;
-	Uint32 start_x, start_y, start_fuel;
-	SDL_Color bgcolor;
-	TileSheet *tiles;
-	Uint8 data[];
+	char sig[4]; ///< Signature (magic number) for map files
+	Uint32 rev; ///< Revision of the spec that this map conforms to
+	Uint32 width; ///< Width of the map
+	Uint32 height; ///< Height of the map
+	Uint32 start_x; ///< x coordinate for player's starting position
+	Uint32 start_y; ///< y coordinate for player's starting position
+	Uint32 start_fuel; ///< Amount of fuel the player will start with
+	SDL_Color bgcolor; ///< Background color
+	TileSheet *tiles; ///< Loaded tilesheet for the map
+	Uint8 data[]; ///< Tile data
 } ML2_Map;
 
 /**

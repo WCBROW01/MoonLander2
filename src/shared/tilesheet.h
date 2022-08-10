@@ -13,11 +13,16 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Tilesheet data
+ */
 typedef struct {
-	SDL_Surface *surface;
-	SDL_Texture *texture;
-	int tile_width, tile_height;
-	int sheet_width, sheet_height;
+	SDL_Surface *surface; ///< surface containing tile data
+	SDL_Texture *texture; ///< texture containing tile data
+	int tile_width; ///< width of a single tile
+	int tile_height; ///< height of a single tile
+	int sheet_width; ///< width of the tilesheet (in tiles)
+	int sheet_height; ///< height of the tilesheet (in tiles)
 } TileSheet;
 
 /**

@@ -16,6 +16,9 @@ extern "C" {
 
 #include <assert.h>
 
+/**
+ * @brief Set of tiles present in default tilesheets
+ */
 enum tile {
 	TILE_NONE,
 	TILE_ROCK_0,
@@ -28,6 +31,9 @@ enum tile {
 	TILE_COUNT
 };
 
+/**
+ * @brief Tilesheets included in the game (used for map loading)
+ */
 enum builtin_tilesheets {
 	TILESHEET_CUSTOM,
 	TILESHEET_MOON,

@@ -29,7 +29,7 @@
 #define RTOD(x) ((x) * 180 / M_PI)
 #define CMP_ZERO(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-Uint32 Lander_physics(Uint32 interval, void *param) {
+static Uint32 Lander_physics(Uint32 interval, void *param) {
 	Lander *l = (Lander*) param;
 
 	l->angle -= l->turning * 0.01f;
