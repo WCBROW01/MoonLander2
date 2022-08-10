@@ -1,7 +1,9 @@
-/*
- * Source code for the Lander object.
- * Contributors: Will Brown, Jerrin Redmon
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown, Jerrin Redmon
+/**
+ * @file
+ * @brief Source code for the Lander object.
+ * @author Will Brown
+ * @author Jerrin Redmon
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 

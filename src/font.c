@@ -1,7 +1,8 @@
-/*
- * Abstractions for using bitmap fonts.
- * Contributors: Will Brown
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+/**
+ * @file
+ * @brief Abstractions for using bitmap fonts.
+ * @author Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 

@@ -1,13 +1,16 @@
-/*
- * Abstractions for using tilesheets with textures.
- * Contributors: Will Brown
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+/**
+ * @file
+ * @brief Abstractions for using tilesheets with textures.
+ * @author Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
 #include <SDL.h>
 
 #include "tilesheet.h"
+
+// TODO: Add flag to tilesheet creation for whether you want to create a surface or texture (or both)
 
 // Takes an SDL Surface, and the width and height of each tile, and creates a tilesheet.
 TileSheet *TileSheet_createFromSurface(SDL_Surface *surface, SDL_Renderer *renderer, int tile_width, int tile_height) {

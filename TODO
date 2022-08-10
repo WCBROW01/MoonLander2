@@ -9,3 +9,6 @@
 - Add the following to the map file spec:
 	- Tile attributes (will increase size)
 	- Use extra bits from this addition to increase tile limit (to 256?)
+
+- API changes:
+	- Add flag to tilesheet creation for whether you want to create a surface or texture (or both)

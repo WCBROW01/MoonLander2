@@ -1,7 +1,9 @@
-/*
- * Entrypoint for the game.
- * Contributors: Will Brown, Jerrin Redmon
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+/**
+ * @file
+ * @brief Entrypoint for the game.
+ * @author Will Brown
+ * @author Jerrin Redmon
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
@@ -16,8 +18,6 @@
 #include "font.h"
 #include "map.h"
 
-
-
 // Game state, may end up in a struct at some point.
 static SDL_Window *window;
 static int win_w, win_h, screen_w, screen_h;
@@ -29,7 +29,7 @@ static ML2_Map *map;
 /* This function frees all game memory in preparation to exit the program.
  * It should be registered using atexit(), so you should never need to call it.
  * If you want to exit the program early, use exit() like you normally would. */
-void exit_game(void) {
+static void exit_game(void) {
 	ML2_Map_free(map);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);

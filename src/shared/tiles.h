@@ -1,8 +1,9 @@
-/*
- * Contains necessary data for using the default set of tiles.
+/**
+ * @file
+ * @brief Contains necessary data for using the default set of tiles.
  * This is subject to change, and a new, more dynamic solution may be used later.
- * Contributors: Will Brown
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * @author Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 

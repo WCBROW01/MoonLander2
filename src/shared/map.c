@@ -1,9 +1,11 @@
-/*
- * Map file routines for Moon Lander 2.
- * Contributors: Will Brown
- * Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+/**
+ * @file
+ * @brief Map file routines for Moon Lander 2.
+ * @author Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
+
 #include <SDL.h>
 
 #include "tilesheet.h"
