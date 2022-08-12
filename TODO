@@ -12,3 +12,4 @@
 
 - API changes:
 	- Add flag to tilesheet creation for whether you want to create a surface or texture (or both)
+	- Allow changing the color of text in font API (both by calling a function, and using escape codes)
