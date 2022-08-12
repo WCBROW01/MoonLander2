@@ -6,11 +6,6 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
-// Sorry Microsoft, this isn't Windows code. I know what I'm doing.
-#define _CRT_SECURE_NO_WARNINGS
-
-#include <string.h>
-
 #include <SDL.h>
 
 #include "tilesheet.h"
@@ -131,8 +126,7 @@ ML2_Map *ML2_Map_loadFromMem(void *src, int size, SDL_Renderer *renderer) {
 ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 	SDL_RWops *src = SDL_RWFromFile(path, "rb");
 	if (!src) {
-		char *error = SDL_malloc(SDL_strlen(SDL_GetError()) + 1);
-		strcpy(error, SDL_GetError());
+		char *error = SDL_strdup(SDL_GetError());
 		SDL_SetError("Failed to open map file %s: %s", path, error);
 		SDL_free(error);
 		return NULL;
