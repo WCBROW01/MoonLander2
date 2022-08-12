@@ -55,15 +55,11 @@ void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_po
 
 void Font_renderFormatted(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *format, ...) {
 	va_list ap;
+	char *text;
 	va_start(ap, format);
-	int text_len = SDL_vsnprintf(NULL, 0, format, ap);
-	va_end(ap);
-
-	size_t size = text_len + 1;
-	char text[size];
-	va_start(ap, format);
-	text_len = SDL_vsnprintf(text, size, format, ap);
+	SDL_vasprintf(&text, format, ap);
 	va_end(ap);
 
 	Font_renderText(font, renderer, dst_point, text);
+	SDL_free(text);
 }

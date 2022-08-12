@@ -47,8 +47,8 @@ static Uint32 Lander_physics(Uint32 interval, void *param) {
 			l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.25f + 1.0f) * 10.0f / TICKRATE : 0.0f;
 		}
 	} else {
-		l->vel_fuel_x -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabs(SDL_cosf(l->angle));
-		l->vel_fuel_y -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_y) * SDL_fabs(SDL_sinf(l->angle));
+		l->vel_fuel_x -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabsf(SDL_cosf(l->angle));
+		l->vel_fuel_y -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_y) * SDL_fabsf(SDL_sinf(l->angle));
 		l->anim_frame = 0;
 	}
 

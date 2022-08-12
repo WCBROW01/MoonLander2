@@ -1,5 +1,11 @@
 # Directories to ignore
 docs/
+libs/
+
+# Visual Studio Build Artifacts
+Debug/
+Release/
+x64/
 
 # Prerequisites
 *.d

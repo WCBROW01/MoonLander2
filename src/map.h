@@ -9,10 +9,6 @@
 #ifndef MOONLANDER_MAP_H
 #define MOONLANDER_MAP_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief Flags enum for collision result
  */
@@ -119,9 +115,5 @@ int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old);
  * @param camera_pos The position of the in-game camera
  */
 void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

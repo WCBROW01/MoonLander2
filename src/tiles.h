@@ -10,10 +10,6 @@
 #ifndef MOONLANDER_TILES_H
 #define MOONLANDER_TILES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <assert.h>
 
 /**
@@ -45,9 +41,5 @@ static_assert(TILESHEET_COUNT == 2, "Exhaustive handling of tilesets in TILESHEE
 static const char *TILESHEET_PATHS[TILESHEET_COUNT] = {
 	[TILESHEET_MOON] = "tiles/moon.bmp"
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

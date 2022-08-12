@@ -36,8 +36,8 @@ typedef struct {
 	float fuel_level; ///< fuel level of the lander
 	char anim_frame, anim_timer; ///< Animation state
 	char turning; ///< The direction the player is turning
-	SDL_bool state : 1; ///< Whether the player is accelerating
-	SDL_bool fast : 1; ///< Whether the player is going fast
+	SDL_bool state; ///< Whether the player is accelerating
+	SDL_bool fast; ///< Whether the player is going fast
 } Lander;
 
 /**

@@ -6,6 +6,8 @@
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
+#include <stdlib.h>
+
 #include <SDL.h>
 
 #include "tilesheet.h"

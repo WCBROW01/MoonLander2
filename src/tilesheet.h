@@ -9,10 +9,6 @@
 #ifndef MOONLANDER_TILESHEET_H
 #define MOONLANDER_TILESHEET_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief Tilesheet data
  */
@@ -87,9 +83,5 @@ SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index);
  * @return Uint32 representing the color of the pixel
  */
 Uint32 TileSheet_getPixel(TileSheet *tilesheet, int index, int x, int y);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
