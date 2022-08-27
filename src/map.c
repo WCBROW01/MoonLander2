@@ -12,6 +12,13 @@
 #include "tiles.h"
 #include "map.h"
 
+// Correct signature is the null-terminated string "ML2"
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN 
+#define CORRECT_SIG 0x4D4C3200
+#else
+#define CORRECT_SIG 0x00324C4D
+#endif
+
  /* Load the contents of a map from RWops into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
@@ -19,11 +26,11 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 	ML2_Map *map = NULL;
 
 	// Copy header into memory and check for validity
-	char sig[4];
+	Uint32 loaded_sig;
 	ML2_Map map_header;
 	if (
-		SDL_RWread(src, sig, 1, 4) != 4 ||
-		SDL_memcmp(sig, "ML2", 4) != 0 ||
+		SDL_RWread(src, &loaded_sig, 1, 4) != 4 ||
+		loaded_sig != CORRECT_SIG ||
 		SDL_RWread(src, &map_header, 1, 12) != 12
 	) {
 		SDL_SetError("Attempted to load an invalid map.");
