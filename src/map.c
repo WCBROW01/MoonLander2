@@ -19,10 +19,12 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 	ML2_Map *map = NULL;
 
 	// Copy header into memory and check for validity
+	char sig[4];
 	ML2_Map map_header;
 	if (
-		SDL_RWread(src, &map_header, 1, 16) != 16 ||
-		SDL_strcmp(map_header.sig, "ML2") != 0
+		SDL_RWread(src, sig, 1, 4) != 4 ||
+		SDL_memcmp(sig, "ML2", 4) != 0 ||
+		SDL_RWread(src, &map_header, 1, 12) != 12
 	) {
 		SDL_SetError("Attempted to load an invalid map.");
 		goto done;
@@ -85,7 +87,6 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 	map = SDL_malloc(sizeof(ML2_Map) + map_size);
 	if (!map) {
 		SDL_SetError("Failed to load map into memory: not enough memory.");
-		SDL_free(map);
 		goto done;
 	} else {
 		*map = map_header;

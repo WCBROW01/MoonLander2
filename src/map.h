@@ -21,7 +21,6 @@ enum ML2_Map_CollisionAxis {
  * @brief Map data
  */
 typedef struct {
-	char sig[4]; ///< Signature (magic number) for map files
 	Uint32 rev; ///< Revision of the spec that this map conforms to
 	Uint32 width; ///< Width of the map
 	Uint32 height; ///< Height of the map
