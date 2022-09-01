@@ -86,7 +86,7 @@ static void init_game(void) {
 	audio_system = ML2_AudioSystem_create(NULL, desired, NULL);
 	
 	if (!audio_system) {
-		fprintf(stderr, "ML2_AudioSystem_create does not log errors yet\n");
+		fprintf(stderr, "ML2_AudioSystem_create: %s\n", SDL_GetError());
 		exit(1);
     }
     

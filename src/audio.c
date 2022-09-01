@@ -7,8 +7,6 @@
  */
 
 /* TODO:
- * Handle Errors
- * Log Errors in SDL
  * Decrease size of mixing code if possible
  * Add volume adjustment
  * File loading routines
@@ -32,7 +30,7 @@ struct ML2_AudioSystem {
 	void *userdata[NUM_STREAMS];
 	Uint8 *streams;
 	SDL_AudioDeviceID device;
-	Uint8 stream_status;
+	_Atomic Uint8 stream_status;
 };
 
 #define CLAMP(x, min, max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
@@ -169,18 +167,29 @@ ML2_AudioSystem *ML2_AudioSystem_create(
 )
 {
 	ML2_AudioSystem *system = SDL_malloc(sizeof(ML2_AudioSystem));
+	if (!system) {
+		SDL_SetError("Out of memory");
+		return NULL;
+	}
+
 	desired.callback = ML2_AudioSystem_callback;
 	desired.userdata = system;
 	
 	system->stream_status = 0;
 	system->device = SDL_OpenAudioDevice(device, 0, &desired, &system->spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
 	system->streams = SDL_malloc(system->spec.size * NUM_STREAMS);
+	if (!system->streams) {
+		SDL_SetError("Out of memory");
+		free(system);
+		return NULL;
+	}
 	
 	if (obtained) *obtained = system->spec;
 	return system;
 }
 
 void ML2_AudioSystem_destroy(ML2_AudioSystem *system) {
+	if (!system) return;
 	SDL_CloseAudioDevice(system->device);
 	SDL_free(system->streams);
 	SDL_free(system);
