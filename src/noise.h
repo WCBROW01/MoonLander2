@@ -26,12 +26,12 @@ typedef struct {
 
 #define LERP(a, b, t) (((b) - (a)) * (t) + (a))
 
-static void white_noise(NoiseGen *gen, Sint16 *stream, size_t stream_len) {
+static void white_noise(NoiseGen *gen, Sint16 *stream, const int len) {
 	float gen_step = (1.0f / (gen->period * SAMPLE_DT));
 
-	for (size_t i = 0; i < stream_len; ++i) {
+	for (Sint16 *sample = stream; sample < stream + len; ++sample) {
 		gen->a += gen_step * SAMPLE_DT;
-		stream[i] = LERP(gen->next, gen->current, gen->a);
+		*sample = LERP(gen->next, gen->current, gen->a);
 
 		if (gen->a >= 1.0f) {
 			Sint16 value = (rand() & 1023);
@@ -44,7 +44,7 @@ static void white_noise(NoiseGen *gen, Sint16 *stream, size_t stream_len) {
 }
 
 static void white_noise_callback(void *userdata, Uint8 *stream, int len) {
-	white_noise(userdata, (Sint16*) stream, len / 2);
+	white_noise(userdata, (Sint16 *)stream, len / 2);
 }
 
 #endif
