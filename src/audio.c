@@ -67,7 +67,7 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT8, SDL_MAX_SINT8);
 					
-					((Sint8 *)stream)[i] = buf;
+					((Uint8 *)stream)[i] = buf;
 				} else {
 					// Add all audio sources into buffer
 					Sint16 buf = 0;
@@ -92,9 +92,9 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT16, SDL_MAX_SINT16);
 					
-					((Sint16 *)stream)[i] = (Sint16) (SDL_AUDIO_ISBIGENDIAN(system->spec.format) ?
+					((Uint16 *)stream)[i] = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ?
 						SDL_SwapBE16(buf) :
-						SDL_SwapLE16(buf));
+						SDL_SwapLE16(buf);
 				} else {
 					// Add all audio sources into buffer
 					Sint32 buf = 0;
@@ -139,9 +139,9 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT32, SDL_MAX_SINT32);
 					
-					((Sint32 *)stream)[i] = (Sint32) (SDL_AUDIO_ISBIGENDIAN(system->spec.format) ?
+					((Uint32 *)stream)[i] = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ?
 						SDL_SwapBE32(buf) :
-						SDL_SwapLE32(buf));
+						SDL_SwapLE32(buf);
 				} else {
 					// Add all audio sources into buffer
 					Sint64 buf = 0;
