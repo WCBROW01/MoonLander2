@@ -1,7 +1,7 @@
 game_src = $(wildcard src/*.c)
 game_obj = $(game_src:.c=.o)
 
-CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Isrc/shared -fpic -fno-strict-aliasing
+CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Isrc/shared -flto
 
 # Link SDL statically if building on Windows so you don't need to distribute SDL2.dll
 ifeq ($(OS), Windows_NT)
@@ -12,6 +12,9 @@ endif
 
 moonlander: $(game_obj)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)
+
+src/audio.o: src/audio.c # This file needs strict aliasing disabled
+	$(CC) $(CFLAGS) -fno-strict-aliasing -c -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)
 
 .PHONY: clean
 clean:
