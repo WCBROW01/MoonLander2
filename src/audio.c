@@ -114,7 +114,7 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 			case 32: {
 				if (SDL_AUDIO_ISFLOAT(system->spec.format)) {
 					// Add all audio sources into buffer
-					double buf = 0.0;
+					float buf = 0.0f;
 					for (int j = 0; j < NUM_STREAMS; ++j) {
 						Uint32 temp = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE32(((Uint32 *)SELECT_STREAM(system, j))[i]) :
