@@ -32,4 +32,6 @@ void ML2_AudioSystem_pauseSystem(ML2_AudioSystem *system, SDL_bool pause_on);
 
 void ML2_AudioSystem_pauseStream(ML2_AudioSystem *system, int stream, SDL_bool pause_on);
 
+void ML2_AudioSystem_adjustVolume(ML2_AudioSystem *system, int stream, float volume);
+
 #endif

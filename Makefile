@@ -13,9 +13,6 @@ endif
 moonlander: $(game_obj)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)
 
-src/audio.o: src/audio.c # This file needs strict aliasing disabled
-	$(CC) $(CFLAGS) -fno-strict-aliasing -c -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)
-
 .PHONY: clean
 clean:
 	rm -f $(game_obj) $(lib_obj) moonlander

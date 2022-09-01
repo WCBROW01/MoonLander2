@@ -7,8 +7,8 @@
  */
 
 /* TODO:
+ * Add documentation
  * Decrease size of mixing code if possible
- * Add volume adjustment
  * File loading routines
  * Convert audio formats if necessary
  */
@@ -28,14 +28,15 @@ struct ML2_AudioSystem {
 	SDL_AudioSpec spec;
 	SDL_AudioCallback callbacks[NUM_STREAMS];
 	void *userdata[NUM_STREAMS];
+	float volume[NUM_STREAMS];
 	Uint8 *streams;
 	SDL_AudioDeviceID device;
 	_Atomic Uint8 stream_status;
 };
 
 #define CLAMP(x, min, max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
-
 #define SELECT_STREAM(system, x) ((system)->streams + (system)->spec.size * (x))
+#define STREAM_ACTIVE(system, stream) (((system)->stream_status & (3 << (stream) * 2)) == (3 << (stream) * 2))
 
 static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 	ML2_AudioSystem *system = userdata;
@@ -43,7 +44,7 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 	// Prepare streams for mixing.
 	SDL_memset(stream, system->spec.silence, len);
 	for (int i = 0; i < NUM_STREAMS; ++i) {
-		if ((system->stream_status & (3 << i * 2)) == (3 << i * 2)) {
+		if (STREAM_ACTIVE(system, i)) {
 			system->callbacks[i](system->userdata[i], SELECT_STREAM(system, i), len);
 		} else {
 			SDL_memset(SELECT_STREAM(system, i), system->spec.silence, len);
@@ -59,8 +60,8 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 				if (SDL_AUDIO_ISSIGNED(system->spec.format)) {
 					// Add all audio sources into buffer
 					Sint16 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
-						buf += ((Sint8 *)SELECT_STREAM(system, j))[i];
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
+						buf += ((Sint8 *)SELECT_STREAM(system, j))[i] * system->volume[j];
 					
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT8, SDL_MAX_SINT8);
@@ -69,8 +70,8 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 				} else {
 					// Add all audio sources into buffer
 					Sint16 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
-						buf += ((Uint8 *)SELECT_STREAM(system, j))[i] + SDL_MIN_SINT8;
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
+						buf += (((Uint8 *)SELECT_STREAM(system, j))[i] + SDL_MIN_SINT8) * system->volume[j];
 						
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT8, SDL_MAX_SINT8) - SDL_MIN_SINT8;
@@ -82,10 +83,10 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 				if ((SDL_AUDIO_ISSIGNED(system->spec.format))) {
 					// Add all audio sources into buffer
 					Sint32 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
 						buf += (Sint16) (SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE16(((Uint16 *)SELECT_STREAM(system, j))[i]) :
-							SDL_SwapLE16(((Uint16 *)SELECT_STREAM(system, j))[i]));
+							SDL_SwapLE16(((Uint16 *)SELECT_STREAM(system, j))[i])) * system->volume[j];
 					
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT16, SDL_MAX_SINT16);
@@ -96,10 +97,10 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 				} else {
 					// Add all audio sources into buffer
 					Sint32 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
-						buf += SDL_MIN_SINT16 + SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
+						buf += (SDL_MIN_SINT16 + SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE16(((Uint16 *)SELECT_STREAM(system, j))[i]) :
-							SDL_SwapLE16(((Uint16 *)SELECT_STREAM(system, j))[i]);
+							SDL_SwapLE16(((Uint16 *)SELECT_STREAM(system, j))[i])) * system->volume[j];
 					
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT16, SDL_MAX_SINT16) - SDL_MIN_SINT16;
@@ -112,27 +113,32 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 			case 32: {
 				if (SDL_AUDIO_ISFLOAT(system->spec.format)) {
 					// Add all audio sources into buffer
-					float buf = 0.0f;
-					for (int j = 0; j < NUM_STREAMS; ++j) {
-						Uint32 temp = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
+					union floatbuf {
+						Uint32 i;
+						float f;
+					} buf;
+					buf.f = 0.0f;
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j)) {
+						union floatbuf temp;
+						temp.i = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE32(((Uint32 *)SELECT_STREAM(system, j))[i]) :
 							SDL_SwapLE32(((Uint32 *)SELECT_STREAM(system, j))[i]);
-						buf += *(float *)&temp;
+						buf.f += temp.f * system->volume[j];
 					}
 					
 					// Perform overflow clipping
-					buf = CLAMP(buf, -1.0, 1.0);
+					buf.f = CLAMP(buf.f, -1.0, 1.0);
 					
 					((Uint32 *)stream)[i] = SDL_AUDIO_ISBIGENDIAN(system->spec.format) ?
-						SDL_SwapBE32(*(Uint32 *)&buf) :
-						SDL_SwapLE32(*(Uint32 *)&buf);
+						SDL_SwapBE32(buf.i) :
+						SDL_SwapLE32(buf.i);
 				} else if ((SDL_AUDIO_ISSIGNED(system->spec.format))) {
 					// Add all audio sources into buffer
 					Sint64 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
 						buf += (Sint32) (SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE32(((Uint32 *)SELECT_STREAM(system, j))[i]) :
-							SDL_SwapLE32(((Uint32 *)SELECT_STREAM(system, j))[i]));
+							SDL_SwapLE32(((Uint32 *)SELECT_STREAM(system, j))[i])) * system->volume[j];
 					
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT32, SDL_MAX_SINT32);
@@ -143,10 +149,10 @@ static void ML2_AudioSystem_callback(void *userdata, Uint8 *stream, int len) {
 				} else {
 					// Add all audio sources into buffer
 					Sint64 buf = 0;
-					for (int j = 0; j < NUM_STREAMS; ++j)
-						buf += SDL_MIN_SINT32 + SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
+					for (int j = 0; j < NUM_STREAMS; ++j) if (STREAM_ACTIVE(system, j))
+						buf += (SDL_MIN_SINT32 + SDL_AUDIO_ISBIGENDIAN(system->spec.format) ? 
 							SDL_SwapBE32(((Uint32 *)SELECT_STREAM(system, j))[i]) :
-							SDL_SwapLE32(((Uint32 *)SELECT_STREAM(system, j))[i]);
+							SDL_SwapLE32(((Uint32 *)SELECT_STREAM(system, j))[i])) * system->volume[j];
 					
 					// Perform overflow clipping
 					buf = CLAMP(buf, SDL_MIN_SINT32, SDL_MAX_SINT32) - SDL_MIN_SINT32;
@@ -206,6 +212,7 @@ int ML2_AudioSystem_addStream(
 		if (!(system->stream_status & (1 << i * 2))) {
 			system->callbacks[i] = callback;
 			system->userdata[i] = userdata;
+			system->volume[i] = 1.0f;
 			system->stream_status &= ~(2 << i * 2);
 			system->stream_status |= (1 << i * 2);
 			return i;
@@ -226,4 +233,9 @@ void ML2_AudioSystem_pauseSystem(ML2_AudioSystem *system, SDL_bool pause_on) {
 void ML2_AudioSystem_pauseStream(ML2_AudioSystem *system, int stream, SDL_bool pause_on) {
 	if (pause_on) system->stream_status &= ~(2 << stream * 2);
 	else system->stream_status |= 2 << stream * 2;
+}
+
+void ML2_AudioSystem_adjustVolume(ML2_AudioSystem *system, int stream, float volume) {
+	if (volume < 0.0f) volume = 0.0f;
+	system->volume[stream] = volume;
 }
