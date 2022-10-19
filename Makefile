@@ -11,8 +11,7 @@ else
 endif
 
 moonlander: $(game_obj)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(GAME_LDFLAGS)
 
 .PHONY: clean
 clean:
-	rm -f $(game_obj) $(lib_obj) moonlander
+	rm -f $(game_obj) moonlander
