@@ -9,6 +9,10 @@
 #ifndef MOONLANDER_MAP_H
 #define MOONLANDER_MAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Flags enum for collision result
  */
@@ -114,5 +118,19 @@ int ML2_Map_doCollision(ML2_Map *map, const SDL_Rect *r, const SDL_Rect *r_old);
  * @param camera_pos The position of the in-game camera
  */
 void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos);
+
+/**
+ * @brief Render map onto renderer with a given tileset, camera position, and scale factor.
+ * 
+ * @param map The map to render
+ * @param renderer The renderer to render on
+ * @param camera_pos The position of the in-game camera
+ * @param scale The factor to scale the render by.
+ */
+void ML2_Map_renderScaled(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos, float scale);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

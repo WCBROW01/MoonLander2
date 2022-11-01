@@ -1,6 +1,10 @@
 # Directories to ignore
 docs/
 libs/
+map_editor/imgui/
+
+# ImGui saved window positions
+imgui.ini
 
 # Visual Studio Build Artifacts
 Debug/
@@ -44,6 +48,8 @@ x64/
 *.i*86
 *.x86_64
 *.hex
+moonlander
+ml2-editor
 
 # Debug files
 *.dSYM/

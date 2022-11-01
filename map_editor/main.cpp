@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <SDL.h>
+
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_sdlrenderer.h"
+
+#include "tilesheet.h"
+#include "map.h"
+
+#if !SDL_VERSION_ATLEAST(2,0,17)
+#error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
+#endif
+
+namespace ML2 {
+	void ShowNewWindow(bool *open) {
+		if (!ImGui::Begin("Create New Map", open)) {
+			ImGui::End();
+			return;
+		}
+	
+		static int w, h;
+		ImGui::InputInt("Width", &w);
+		ImGui::InputInt("Height", &h);
+		if (ImGui::Button("Ok")) {
+			*open = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel")) {
+			*open = false;
+		}
+		ImGui::End();
+	}
+
+	void ShowAboutWindow(bool *open) {
+		if (!ImGui::Begin("About ML2 Editor", open)) {
+			// Don't render window if collapsed
+			ImGui::End();
+			return;
+		}
+		
+		ImGui::Text("Map editor for Moon Lander 2.");
+		ImGui::Text("Licensed under the GNU General Public License v3");
+		ImGui::Text("See LICENSE or https://www.gnu.org/licenses/");
+		ImGui::Text("(c) Will Brown");
+		ImGui::End();
+	}	
+}
+
+int main(int argc, char *argv[]) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) < 0) {
+		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
+		return 1;
+	}
+	
+	// Setup window
+	SDL_WindowFlags window_flags = (SDL_WindowFlags) (SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	SDL_Window *window = SDL_CreateWindow("ML2 Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 768, window_flags);
+	if (!window) {
+		fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
+		return 1;
+	}
+	
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+	if (!renderer) {
+		fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
+		return 1;
+	}
+	
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	
+	// Set style
+	ImGui::StyleColorsLight();
+	
+	// Init backends
+	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer_Init(renderer);
+	
+	// Load map
+	ML2_Map *map = ML2_Map_loadFromFile("test4.ml2", renderer);
+	SDL_Point camera_pos = {0, 0};
+	SDL_Point tile_pos = {0, 0};
+	
+	bool show_new_window = false;
+	bool show_about_window = false;
+	bool dark_theme = false;
+	
+	bool done = false;
+	while (!done) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			ImGui_ImplSDL2_ProcessEvent(&e);
+			if (e.type == SDL_QUIT) {
+				done = true;
+			} else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE && e.window.windowID == SDL_GetWindowID(window)) {
+				done = true;
+			}
+		}
+		
+		// Start Dear ImGui frame
+		ImGui_ImplSDLRenderer_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
+		
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("New")) {
+					show_new_window = true;
+				}
+				if (ImGui::MenuItem("Open")) {
+					// file dialog of some sort
+				}
+				if (ImGui::MenuItem("Save")) {
+					// 
+				}
+				if (ImGui::MenuItem("Save As")) {
+					// file dialog of some sort
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Quit")) {
+					done = true;
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("View")) {
+				if (ImGui::MenuItem("Toggle dark theme")) {
+					if ((dark_theme = !dark_theme)) {
+						ImGui::StyleColorsDark();
+					} else {
+						ImGui::StyleColorsLight();
+					}
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Help")) {
+				if (ImGui::MenuItem("About")) {
+					show_about_window = true;
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+		
+		
+		if (show_new_window) ML2::ShowNewWindow(&show_new_window);
+		if (show_about_window) ML2::ShowAboutWindow(&show_about_window);
+		
+		// Render
+		ImGui::Render();
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+		
+		ML2_Map_renderScaled(map, renderer, &camera_pos, 2);
+		
+		// Create green highlight for tile being hovered over
+		if (!io.WantCaptureMouse) {
+			int win_w, win_h, mouse_x, mouse_y;
+			SDL_GetWindowSize(window, &win_w, &win_h);
+			SDL_GetMouseState(&mouse_x, &mouse_y);
+			
+			tile_pos = {
+				.x = (camera_pos.x + mouse_x) / map->tiles->tile_width / 2,
+				.y = (camera_pos.y + win_h - mouse_y) / map->tiles->tile_height / 2
+			};
+			
+			SDL_Rect highlight_rect = {
+				.x = tile_pos.x * map->tiles->tile_width * 2 - camera_pos.x,
+				.y = win_h - map->tiles->tile_height * 2 - tile_pos.y * map->tiles->tile_height * 2 - camera_pos.y,
+				.w = map->tiles->tile_width * 2,
+				.h = map->tiles->tile_height * 2
+			};
+			
+			SDL_SetRenderDrawColor(renderer, 0, 127, 0, 200);
+			SDL_RenderFillRect(renderer, &highlight_rect);
+		}
+		
+		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+		SDL_RenderPresent(renderer);
+	}
+	
+	// Cleanup
+	ImGui_ImplSDLRenderer_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
+	
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+	
+	return 0;
+}

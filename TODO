@@ -3,7 +3,7 @@
 	- Create menu system
 	- Create real title screen (requires menu)
 	- Switchable controls, more supported control schemes
-	- Create map editor (either outside of game, or built in)
+	- Create map editor (either outside of game, or built in) (In progress!)
 		- It does not need to run on everything that the game does, it can be an optional component.
 
 - Add the following to the map file spec:

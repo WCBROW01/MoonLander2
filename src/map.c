@@ -162,29 +162,33 @@ int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip) {
 
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
+	ML2_Map_renderScaled(map, renderer, camera_pos, 1);
+}
+
+void ML2_Map_renderScaled(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos, float scale) {
 	int render_w, render_h;
 	SDL_RenderGetLogicalSize(renderer, &render_w, &render_h);
 	if (!render_w || !render_h)
 		SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
 	
 	for (
-		int y = camera_pos->y / map->tiles->tile_height;
-		y <= (camera_pos->y + render_h) / map->tiles->tile_height;
+		int y = camera_pos->y / map->tiles->tile_height / scale;
+		y <= (camera_pos->y + render_h) / map->tiles->tile_height / scale;
 		++y
 	) {
 		for (
-			int x = camera_pos->x / map->tiles->tile_width;
-			x <= (camera_pos->x + render_w) / map->tiles->tile_width;
+			int x = camera_pos->x / map->tiles->tile_width / scale;
+			x <= (camera_pos->x + render_w) / map->tiles->tile_width / scale;
 			++x
 		) {
 			int flip = 0;
 			int tile = ML2_Map_getTile(map, x, y, &flip);
 			SDL_Rect src = TileSheet_getTileRect(map->tiles, tile);
 			SDL_Rect dst = {
-				.x = x * map->tiles->tile_width - camera_pos->x,
-				.y = render_h - y * map->tiles->tile_height + camera_pos->y - map->tiles->tile_height,
-				.w = map->tiles->tile_width,
-				.h = map->tiles->tile_height
+				.x = x * map->tiles->tile_width * scale - camera_pos->x,
+				.y = render_h - y * map->tiles->tile_height * scale + camera_pos->y - map->tiles->tile_height * scale,
+				.w = map->tiles->tile_width * scale,
+				.h = map->tiles->tile_height * scale
 			};
 			SDL_RenderCopyEx(renderer, map->tiles->texture, &src, &dst, 0, NULL, flip);
 		}

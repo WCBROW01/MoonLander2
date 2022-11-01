@@ -12,7 +12,7 @@ Why did I decide to make this? I have no idea. The first project is just a meme 
 - [x] The camera will either change size as you get higher (akin to the Atari game), or scroll.
 - [ ] Just generally act more like the Atari lunar lander game.
 - [ ] Run on a wide variety of platforms.
-- [ ] Include a map editor. (either internal or external)
+- [ ] Include a map editor. (either internal or external) (Currently in progress!)
 
 Regardless, this is mostly an excuse for me to do some graphics programming, so don’t actually expect any of this to be here.
 
