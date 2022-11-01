@@ -14,7 +14,7 @@
 #include "font.h"
 
 Font *Font_create(const char *file_path, SDL_Renderer *renderer) {
-	return TileSheet_create(file_path, renderer, 8, 8);
+	return TileSheet_create(file_path, renderer, 8, 8, 0);
 }
 
 void Font_destroy(Font *font) {

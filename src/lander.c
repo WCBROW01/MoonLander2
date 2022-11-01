@@ -89,7 +89,7 @@ Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map) {
 	Lander *l = SDL_malloc(sizeof(Lander));
 	*l = (Lander) {
 		.renderer = renderer,
-		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT),
+		.sprite_sheet = TileSheet_create("Sprites/LunarModule.bmp", renderer, LANDER_WIDTH, LANDER_HEIGHT, 0),
 		.map = map
 	};
 

@@ -10,6 +10,15 @@
 #define MOONLANDER_TILESHEET_H
 
 /**
+ * @brief Flags for tilesheet creation.
+ */
+enum TileSheet_flags {
+	TILESHEET_CREATETEXTURE = 0, ///< Create a texture (default behavior)
+	TILESHEET_CREATESURFACE = 1, ///< Create a surface (creates an extra copy in system memory)
+	TILESHEET_FREESURFACE = 2 ///< Free surface after it is no longer needed.
+};
+
+/**
  * @brief Tilesheet data
  */
 typedef struct {
@@ -19,6 +28,7 @@ typedef struct {
 	int tile_height; ///< height of a single tile
 	int sheet_width; ///< width of the tilesheet (in tiles)
 	int sheet_height; ///< height of the tilesheet (in tiles)
+	SDL_bool free_surface; ///< Whether to free the surface once it is no longer needed.
 } TileSheet;
 
 /**
@@ -28,9 +38,16 @@ typedef struct {
  * @param renderer The renderer the tilesheet will render to
  * @param tile_width The width of a single tile
  * @param tile_height The height of a single tile
+ * @param flags Flags for creating a tilesheet.
  * @return The newly created tilesheet
  */
-TileSheet *TileSheet_createFromSurface(SDL_Surface *surface, SDL_Renderer *renderer, int tile_width, int tile_height);
+TileSheet *TileSheet_createFromSurface(
+	SDL_Surface *surface,
+	SDL_Renderer *renderer,
+	int tile_width,
+	int tile_height,
+	int flags
+);
 
 /**
  * @brief Takes a Windows bitmap image from RWops, and the width and height of each tile, and creates a tilesheet.
@@ -41,9 +58,17 @@ TileSheet *TileSheet_createFromSurface(SDL_Surface *surface, SDL_Renderer *rende
  * @param renderer The renderer the tilesheet will render to
  * @param tile_width The width of a single tile
  * @param tile_height The height of a single tile
+ * @param flags Flags for creating a tilesheet.
  * @return The newly created tilesheet
  */
-TileSheet *TileSheet_createFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *renderer, int tile_width, int tile_height);
+TileSheet *TileSheet_createFromRWops(
+	SDL_RWops *src,
+	SDL_bool freesrc,
+	SDL_Renderer *renderer,
+	int tile_width,
+	int tile_height,
+	int flags
+);
 
 /**
  * @brief Takes the file path of a Windows bitmap image, and the width and height of each tile, and creates a tilesheet.
@@ -52,12 +77,20 @@ TileSheet *TileSheet_createFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Rende
  * @param renderer The renderer the tilesheet will render to
  * @param tile_width The width of a single tile
  * @param tile_height The height of a single tile
+ * @param flags Flags for creating a tilesheet.
  * @return The newly created tilesheet
  */
-TileSheet *TileSheet_create(const char *file_path, SDL_Renderer *renderer, int tile_width, int tile_height);
+TileSheet *TileSheet_create(
+	const char *file_path,
+	SDL_Renderer *renderer,
+	int tile_width,
+	int tile_height,
+	int flags
+);
 
 /**
  * @brief Frees all the resources for a tilesheet.
+ * @details This WILL NOT free the surface, since this is a borrowed resource.
  * 
  * @param tilesheet The tilesheet to free
  */
@@ -75,6 +108,7 @@ SDL_Rect TileSheet_getTileRect(TileSheet *tilesheet, int index);
 
 /**
  * @brief Get the raw color data of a single pixel in a tile.
+ * @details This requires that you created a surface with the tilesheet. This is not the default.
  * 
  * @param tilesheet The tilesheet to get the tile from
  * @param index The position of the tile on the tilesheet (left-to-right, top-to-bottom)
