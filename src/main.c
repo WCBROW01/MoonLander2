@@ -12,21 +12,17 @@
 
 #include <SDL.h>
 
-#include "noise.h"
 #include "lander.h"
 #include "tilesheet.h"
 #include "tiles.h"
-#include "audio.h"
 #include "font.h"
 #include "map.h"
-
 
 // Game state, may end up in a struct at some point.
 static SDL_Window *window;
 static int win_w, win_h, screen_w, screen_h;
 static SDL_Renderer *renderer;
 static SDL_Texture *render_texture;
-static ML2_AudioSystem *audio_system;
 static Font *font;
 static ML2_Map *map;
 
@@ -35,7 +31,6 @@ static ML2_Map *map;
  * If you want to exit the program early, use exit() like you normally would. */
 static void exit_game(void) {
 	ML2_Map_free(map);
-	ML2_AudioSystem_destroy(audio_system);
 	SDL_DestroyTexture(render_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -58,7 +53,7 @@ static void new_render_texture(void) {
 }
 
 static void init_game(void) {
-	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -76,21 +71,6 @@ static void init_game(void) {
 
 	// This texture will be used as a buffer for rendering.
 	new_render_texture();
-	
-	SDL_AudioSpec desired = {
-		.freq = FREQ,
-		.format = AUDIO_S16SYS,
-		.channels = 1
-	};
-	
-	audio_system = ML2_AudioSystem_create(NULL, desired, NULL);
-	
-	if (!audio_system) {
-		fprintf(stderr, "ML2_AudioSystem_create: %s\n", SDL_GetError());
-		exit(1);
-    }
-    
-    ML2_AudioSystem_pauseSystem(audio_system, 0);
 	
 	font = Font_create("font.bmp", renderer);
 	if (!font) {
@@ -195,11 +175,6 @@ static void render_hud(float speed, float fuel) {
 }
 
 static void game_loop(void) {
-	NoiseGen gen = {
-		.period = 50.0f
-	};
-	
-	int noise_stream = ML2_AudioSystem_addStream(audio_system, white_noise_callback, &gen);
 	Lander *l = Lander_create(renderer, map);
 	SDL_Event e;
 	SDL_bool quit = SDL_FALSE;
@@ -213,7 +188,6 @@ static void game_loop(void) {
 				break;
 			case SDLK_SPACE:
 				l->state = 1;
-				ML2_AudioSystem_pauseStream(audio_system, noise_stream, 0);
 				break;
 			case SDLK_LSHIFT:
 				l->fast = 1;
@@ -232,7 +206,6 @@ static void game_loop(void) {
 			} else if (e.type == SDL_KEYUP && e.key.repeat == 0) switch (e.key.keysym.sym) {
 			case SDLK_SPACE:
 				l->state = 0;
-				ML2_AudioSystem_pauseStream(audio_system, noise_stream, 1);
 				break;
 			case SDLK_LSHIFT:
 				l->fast = 0;
@@ -282,7 +255,6 @@ static void game_loop(void) {
 
 	// free lander once loop finishes
 	Lander_destroy(l);
-	ML2_AudioSystem_removeStream(audio_system, noise_stream);
 }
 
 int main(int argc, char **argv) {

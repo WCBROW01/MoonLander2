@@ -1,7 +1,7 @@
 game_src = $(wildcard src/*.c)
 game_obj = $(game_src:.c=.o)
 
-CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Isrc/shared -flto
+CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags` -O3 -Isrc/shared -fpic
 
 # Link SDL statically if building on Windows so you don't need to distribute SDL2.dll
 ifeq ($(OS), Windows_NT)
