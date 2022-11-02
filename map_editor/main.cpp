@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 					// file dialog of some sort
 				}
 				if (ImGui::MenuItem("Save")) {
-					// 
+					// Save loaded file, or run Save As code
 				}
 				if (ImGui::MenuItem("Save As")) {
 					// file dialog of some sort
@@ -150,33 +150,43 @@ int main(int argc, char *argv[]) {
 		if (show_new_window) ML2::ShowNewWindow(&show_new_window);
 		if (show_about_window) ML2::ShowAboutWindow(&show_about_window);
 		
+#define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a
+		
 		// Render
 		ImGui::Render();
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		if (map) SDL_SetRenderDrawColor(renderer, UNPACK_COLOR(map->bgcolor));
+		else SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		
-		ML2_Map_renderScaled(map, renderer, &camera_pos, 2);
-		
-		// Create green highlight for tile being hovered over
-		if (!io.WantCaptureMouse) {
-			int win_w, win_h, mouse_x, mouse_y;
-			SDL_GetWindowSize(window, &win_w, &win_h);
-			SDL_GetMouseState(&mouse_x, &mouse_y);
+#define MAP_RENDER_SCALE 2
+
+		if (map) {
+			ML2_Map_renderScaled(map, renderer, &camera_pos, MAP_RENDER_SCALE);
 			
-			tile_pos = {
-				.x = (camera_pos.x + mouse_x) / map->tiles->tile_width / 2,
-				.y = (camera_pos.y + win_h - mouse_y) / map->tiles->tile_height / 2
-			};
-			
-			SDL_Rect highlight_rect = {
-				.x = tile_pos.x * map->tiles->tile_width * 2 - camera_pos.x,
-				.y = win_h - map->tiles->tile_height * 2 - tile_pos.y * map->tiles->tile_height * 2 - camera_pos.y,
-				.w = map->tiles->tile_width * 2,
-				.h = map->tiles->tile_height * 2
-			};
-			
-			SDL_SetRenderDrawColor(renderer, 0, 127, 0, 200);
-			SDL_RenderFillRect(renderer, &highlight_rect);
+			// Create green highlight for tile being hovered over
+			if (!io.WantCaptureMouse) {
+				int win_w, win_h, render_w, render_h, mouse_x, mouse_y;
+				SDL_GetWindowSize(window, &win_w, &win_h);
+				SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
+				SDL_GetMouseState(&mouse_x, &mouse_y);
+				mouse_x = mouse_x * render_w / win_w;
+				mouse_y = render_h - mouse_y * render_h / win_h;
+				
+				tile_pos = {
+					.x = (camera_pos.x + mouse_x) / map->tiles->tile_width / MAP_RENDER_SCALE,
+					.y = (camera_pos.y + mouse_y) / map->tiles->tile_height / MAP_RENDER_SCALE
+				};
+				
+				SDL_Rect highlight_rect = {
+					.x = tile_pos.x * map->tiles->tile_width * MAP_RENDER_SCALE - camera_pos.x,
+					.y = render_h - map->tiles->tile_height * MAP_RENDER_SCALE - tile_pos.y * map->tiles->tile_height * MAP_RENDER_SCALE - camera_pos.y,
+					.w = map->tiles->tile_width * MAP_RENDER_SCALE,
+					.h = map->tiles->tile_height * MAP_RENDER_SCALE
+				};
+				
+				SDL_SetRenderDrawColor(renderer, 0, 127, 0, 200);
+				SDL_RenderFillRect(renderer, &highlight_rect);
+			}
 		}
 		
 		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
@@ -184,6 +194,8 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// Cleanup
+	ML2_Map_free(map);
+	
 	ImGui_ImplSDLRenderer_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();

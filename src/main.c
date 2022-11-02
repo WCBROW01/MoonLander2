@@ -233,8 +233,8 @@ static void game_loop(void) {
 		if (using_mouse) {
 			int mouse_x, mouse_y;
 			SDL_GetMouseState(&mouse_x, &mouse_y);
-			mouse_x = mouse_x / ((float) win_w / screen_w);
-			mouse_y = screen_h - mouse_y / ((float) win_h / screen_h);
+			mouse_x = mouse_x * screen_w / win_w;
+			mouse_y = screen_h - mouse_y * screen_h / win_h;
 			int lander_screen_x = lander_point.x - camera_pos.x + LANDER_WIDTH / 2;
 			int lander_screen_y = lander_point.y - camera_pos.y + LANDER_HEIGHT / 2;
 			l->angle = SDL_atan2f(mouse_y - lander_screen_y, mouse_x - lander_screen_x);
@@ -257,9 +257,7 @@ static void game_loop(void) {
 	Lander_destroy(l);
 }
 
-int main(int argc, char **argv) {
-	(void) argc;
-	(void) argv;
+int main(int, char **) {
 	init_game();
 	title_screen();
 	game_loop();
