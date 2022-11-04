@@ -33,6 +33,7 @@ typedef struct {
 	Uint32 start_fuel; ///< Amount of fuel the player will start with
 	SDL_Color bgcolor; ///< Background color
 	TileSheet *tiles; ///< Loaded tilesheet for the map
+	Uint8 tilesheet_enum; ///< Used when saving maps
 	Uint8 data[]; ///< Tile data
 } ML2_Map;
 
@@ -72,6 +73,16 @@ ML2_Map *ML2_Map_loadFromMem(void *src, int size, SDL_Renderer *renderer);
  * @return The newly created map object
  */
 ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer);
+
+/**
+ * @brief Save the contents of a map to disk
+ * @details This will set the SDL error message if it fails
+ *
+ * @param map Map to save
+ * @param path File path to save to
+ * @return Whether the map was saved successfully
+ */
+SDL_bool ML2_Map_save(ML2_Map *map, const char *path);
 
 /**
  * @brief Frees all resources associated with a map.

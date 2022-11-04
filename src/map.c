@@ -49,6 +49,7 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 		map_header.start_y = 6;
 		map_header.start_fuel = 1000;
 		map_header.bgcolor = (SDL_Color) {0, 0, 0, 255};
+		map_header.tilesheet_enum = TILESHEET_MOON;
 		map_header.tiles = TileSheet_create(TILESHEET_PATHS[TILESHEET_MOON], renderer, 16, 16, TILESHEET_CREATESURFACE);
 	} else { // Load revision 2 additions
 		if (SDL_RWread(src, &map_header.start_x, sizeof(Uint32), 3) != 3) { // get start position, fuel
@@ -60,18 +61,16 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
 			SDL_SetError("Attempted to load an invalid map.");
 			goto done;
 		}
-	
-		Uint8 tilesheet_enum;
-		if (SDL_RWread(src, &tilesheet_enum, 1, 1) < 1) { // get tilesheet
+		if (SDL_RWread(src, &map_header.tilesheet_enum, 1, 1) < 1) { // get tilesheet
 			SDL_SetError("Attempted to load an invalid map.");
 			goto done;
 		}
 		
-		if (tilesheet_enum) { // use built-in sheet
-			if (tilesheet_enum >= TILESHEET_COUNT) {
+		if (map_header.tilesheet_enum) { // use built-in sheet
+			if (map_header.tilesheet_enum >= TILESHEET_COUNT) {
 				SDL_SetError("Map contains an invalid tilesheet.");
 				goto done;
-			} else map_header.tiles = TileSheet_create(TILESHEET_PATHS[tilesheet_enum], renderer, 16, 16, TILESHEET_CREATESURFACE);
+			} else map_header.tiles = TileSheet_create(TILESHEET_PATHS[map_header.tilesheet_enum], renderer, 16, 16, TILESHEET_CREATESURFACE);
 		} else { // load embedded sheet
 			struct {Uint32 w, h;} dim;
 			if (SDL_RWread(src, &dim, sizeof(Uint32), 2) != 2) {
@@ -120,13 +119,17 @@ ML2_Map *ML2_Map_loadFromRWops(SDL_RWops *src, SDL_bool freesrc, SDL_Renderer *r
  * will be set and a null pointer will be returned. */
 ML2_Map *ML2_Map_loadFromMem(void *src, int size, SDL_Renderer *renderer) {
 	SDL_RWops *rw = SDL_RWFromMem(src, size);
-	if (!rw) {
-		SDL_SetError("Attempted to load invalid map from memory.");
-		return NULL;
-	}
+	if (!rw) return NULL;
 	
 	return ML2_Map_loadFromRWops(rw, 1, renderer);
 }
+
+// THIS ONLY WORKS IF FORMAT IS A STRING LITERAL
+#define PREFIX_ERROR(format, ...) do { \
+	char *error = SDL_strdup(SDL_GetError()); \
+	SDL_SetError(format ": %s", __VA_ARGS__, error); \
+	SDL_free(error); \
+} while (0)
 
 /* Load the contents of a map file into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
@@ -134,13 +137,70 @@ ML2_Map *ML2_Map_loadFromMem(void *src, int size, SDL_Renderer *renderer) {
 ML2_Map *ML2_Map_loadFromFile(const char *path, SDL_Renderer *renderer) {
 	SDL_RWops *src = SDL_RWFromFile(path, "rb");
 	if (!src) {
-		char *error = SDL_strdup(SDL_GetError());
-		SDL_SetError("Failed to open map file %s: %s", path, error);
-		SDL_free(error);
+		PREFIX_ERROR("Failed to open map file %s", path);
 		return NULL;
 	}
 	
 	return ML2_Map_loadFromRWops(src, 1, renderer);
+}
+
+SDL_bool ML2_Map_save(ML2_Map *map, const char *path) {
+	SDL_bool success = SDL_TRUE;
+
+	SDL_RWops *rw = SDL_RWFromFile(path, "w");
+	if (!rw) {
+		PREFIX_ERROR("Failed to save map file %s", path);
+		return SDL_FALSE;
+	}
+
+	// This intermediate header is here so we don't change byte order in the working copy
+	ML2_Map saved_header = {
+		.rev = SDL_SwapLE32(map->rev),
+		.width = SDL_SwapLE32(map->width),
+		.height = SDL_SwapLE32(map->height),
+		.start_x = SDL_SwapLE32(map->start_x),
+		.start_y = SDL_SwapLE32(map->start_y),
+		.start_fuel = SDL_SwapLE32(map->start_fuel),
+		.bgcolor = map->bgcolor,
+		.tiles = map->tiles,
+		.tilesheet_enum = map->tilesheet_enum,
+	};
+	
+	if (SDL_RWwrite(rw, "ML2", 1, 4) != 4) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	if (SDL_RWwrite(rw, &saved_header.rev, sizeof(Uint32), 6) != 6) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	if (SDL_RWwrite(rw, &saved_header.bgcolor, 1, 4) != 4) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	if (SDL_RWwrite(rw, &saved_header.tilesheet_enum, 1, 1) != 1) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	if (!saved_header.tilesheet_enum && SDL_SaveBMP_RW(saved_header.tiles->surface, rw, 0) < 0) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	size_t map_size = map->width * map->height;
+	if (SDL_RWwrite(rw, map->data, 1, map_size) != map_size) {
+		success = SDL_FALSE;
+		goto done;
+	}
+	
+	done:
+	if (!success) PREFIX_ERROR("Failed to save map file %s", path);
+	SDL_RWclose(rw);
+	return success;
 }
 
 // Currently only calls free, here just in case it is needed later.
