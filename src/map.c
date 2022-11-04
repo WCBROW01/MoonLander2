@@ -220,6 +220,11 @@ int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip) {
 	return tile_data & 63;
 }
 
+void ML2_Map_setTile(ML2_Map *map, Uint32 x, Uint32 y, int tile, int flip) {
+	if (map && x < map->width && y < map->height)
+		map->data[y * map->width + x] = tile | flip << 6;
+}
+
 // Render map onto renderer with a given tileset and camera position.
 void ML2_Map_render(ML2_Map *map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
 	ML2_Map_renderScaled(map, renderer, camera_pos, 1);

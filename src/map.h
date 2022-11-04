@@ -104,10 +104,22 @@ void ML2_Map_free(ML2_Map *map);
  * @param x x-coordinate of the tile
  * @param y y-coordinate of the tile
  * @param flip If non-null, will be filled with information on what direction the tile should be flipped.
- * This value is directly usable with RenderCopyEx.
+ * Since this value is an SDL_RendererFlip value, it is directly usable with RenderCopyEx.
  * @return int representing the type of tile
  */
 int ML2_Map_getTile(ML2_Map *map, Uint32 x, Uint32 y, int *flip);
+
+/**
+ * @brief Set a single tile of a map at the given coordinates
+ *
+ * @param map The map to set the tile on
+ * @param x x-coordinate of the tile
+ * @param y y-coordinate of the tile
+ * @param tile The type of tile to set the tile to
+ * @param flip The direction the tile should be flipped in.
+ * This should be an SDL_RendererFlip value.
+ */
+void ML2_Map_setTile(ML2_Map *map, Uint32 x, Uint32 y, int tile, int flip);
 
 // Returns whether the rectangle is currently colliding with a tile and the direction.
 

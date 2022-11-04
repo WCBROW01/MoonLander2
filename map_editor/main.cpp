@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <limits.h>
+
 #include <SDL.h>
 
 #include "imgui.h"
@@ -12,40 +14,58 @@
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
 
-namespace ML2 {
-	void ShowNewWindow(bool *open) {
-		if (!ImGui::Begin("Create New Map", open)) {
-			ImGui::End();
-			return;
-		}
-	
-		static int w, h;
-		ImGui::InputInt("Width", &w);
-		ImGui::InputInt("Height", &h);
-		if (ImGui::Button("Ok")) {
-			*open = false;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel")) {
-			*open = false;
-		}
+void new_window(bool *open) {
+	if (!ImGui::Begin("Create New Map", open)) {
 		ImGui::End();
+		return;
 	}
 
-	void ShowAboutWindow(bool *open) {
-		if (!ImGui::Begin("About ML2 Editor", open)) {
-			// Don't render window if collapsed
-			ImGui::End();
-			return;
-		}
-		
-		ImGui::Text("Map editor for Moon Lander 2.");
-		ImGui::Text("Licensed under the GNU General Public License v3");
-		ImGui::Text("See LICENSE or https://www.gnu.org/licenses/");
-		ImGui::Text("(c) Will Brown");
-		ImGui::End();
-	}	
+	static int w, h;
+	ImGui::InputInt("Width", &w);
+	ImGui::InputInt("Height", &h);
+	if (ImGui::Button("Create")) {
+		*open = false;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel")) {
+		*open = false;
+	}
+	ImGui::End();
 }
+
+void open_window(bool *open, ML2_Map **map, SDL_Renderer *renderer) {
+	if (!ImGui::Begin("Open Map", open)) {
+		ImGui::End();
+		return;
+	}
+	
+	static char path[PATH_MAX];
+	ImGui::InputText("Path", path, PATH_MAX);
+	if (ImGui::Button("Open")) {
+		ML2_Map_free(*map);
+		*map = ML2_Map_loadFromFile(path, renderer);
+		*open = false;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel")) {
+		*open = false;
+	}
+	ImGui::End();
+}
+
+void about_window(bool *open) {
+	if (!ImGui::Begin("About ML2 Editor", open)) {
+		// Don't render window if collapsed
+		ImGui::End();
+		return;
+	}
+	
+	ImGui::Text("Map editor for Moon Lander 2.");
+	ImGui::Text("Licensed under the GNU General Public License v3");
+	ImGui::Text("See LICENSE or https://www.gnu.org/licenses/");
+	ImGui::Text("(c) Will Brown");
+	ImGui::End();
+}	
 
 int main(int argc, char *argv[]) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) < 0) {
@@ -87,6 +107,7 @@ int main(int argc, char *argv[]) {
 	SDL_Point tile_pos = {0, 0};
 	
 	bool show_new_window = false;
+	bool show_open_window = false;
 	bool show_about_window = false;
 	bool dark_theme = false;
 	
@@ -113,10 +134,10 @@ int main(int argc, char *argv[]) {
 					show_new_window = true;
 				}
 				if (ImGui::MenuItem("Open")) {
-					// file dialog of some sort
+					show_open_window = true;
 				}
 				if (ImGui::MenuItem("Save")) {
-					// Save loaded file, or run Save As code
+					ML2_Map_save(map, "test5.ml2");
 				}
 				if (ImGui::MenuItem("Save As")) {
 					// file dialog of some sort
@@ -147,8 +168,9 @@ int main(int argc, char *argv[]) {
 		}
 		
 		
-		if (show_new_window) ML2::ShowNewWindow(&show_new_window);
-		if (show_about_window) ML2::ShowAboutWindow(&show_about_window);
+		if (show_new_window) new_window(&show_new_window);
+		if (show_open_window) open_window(&show_open_window, &map, renderer);
+		if (show_about_window) about_window(&show_about_window);
 		
 #define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a
 		
@@ -165,21 +187,44 @@ int main(int argc, char *argv[]) {
 			
 			// Create green highlight for tile being hovered over
 			if (!io.WantCaptureMouse) {
-				int win_w, win_h, render_w, render_h, mouse_x, mouse_y;
+				int win_w, win_h, render_w, render_h, mouse_x, mouse_y, mouse_rel_x, mouse_rel_y;
 				SDL_GetWindowSize(window, &win_w, &win_h);
 				SDL_GetRendererOutputSize(renderer, &render_w, &render_h);
-				SDL_GetMouseState(&mouse_x, &mouse_y);
+				Uint32 mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
+				SDL_GetRelativeMouseState(&mouse_rel_x, &mouse_rel_y);
 				mouse_x = mouse_x * render_w / win_w;
-				mouse_y = render_h - mouse_y * render_h / win_h;
+				mouse_y = mouse_y * render_h / win_h;
+				mouse_rel_x = mouse_rel_x * render_w / win_w;
+				mouse_rel_y = mouse_rel_y * render_h / win_h;
 				
 				tile_pos = {
 					.x = (camera_pos.x + mouse_x) / map->tiles->tile_width / MAP_RENDER_SCALE,
-					.y = (camera_pos.y + mouse_y) / map->tiles->tile_height / MAP_RENDER_SCALE
+					.y = (camera_pos.y + render_h - mouse_y) / map->tiles->tile_height / MAP_RENDER_SCALE
 				};
+				
+				if (mouse_state & SDL_BUTTON_LMASK) {
+					ML2_Map_setTile(map, tile_pos.x, tile_pos.y, 1, 0);
+				} else if (mouse_state & SDL_BUTTON_MMASK) {
+					camera_pos.x -= mouse_rel_x;
+					if (camera_pos.x < 0) {
+						camera_pos.x = 0;
+					} else if ((unsigned) camera_pos.x > map->width * map->tiles->tile_width * MAP_RENDER_SCALE - render_w) {
+						camera_pos.x = map->width * map->tiles->tile_width * MAP_RENDER_SCALE - render_w;
+					}
+					
+					camera_pos.y += mouse_rel_y;
+					if (camera_pos.y < 0) {
+						camera_pos.y = 0;
+					} else if ((unsigned) camera_pos.y > map->height * map->tiles->tile_height * MAP_RENDER_SCALE - render_h) {
+						camera_pos.y = map->height * map->tiles->tile_height * MAP_RENDER_SCALE - render_h;
+					}
+				} else if (mouse_state & SDL_BUTTON_RMASK) {
+					ML2_Map_setTile(map, tile_pos.x, tile_pos.y, 0, 0);
+				}
 				
 				SDL_Rect highlight_rect = {
 					.x = tile_pos.x * map->tiles->tile_width * MAP_RENDER_SCALE - camera_pos.x,
-					.y = render_h - map->tiles->tile_height * MAP_RENDER_SCALE - tile_pos.y * map->tiles->tile_height * MAP_RENDER_SCALE - camera_pos.y,
+					.y = render_h - map->tiles->tile_height * MAP_RENDER_SCALE - (tile_pos.y * map->tiles->tile_height * MAP_RENDER_SCALE - camera_pos.y),
 					.w = map->tiles->tile_width * MAP_RENDER_SCALE,
 					.h = map->tiles->tile_height * MAP_RENDER_SCALE
 				};
