@@ -205,6 +205,7 @@ SDL_bool ML2_Map_save(ML2_Map *map, const char *path) {
 
 // Currently only calls free, here just in case it is needed later.
 void ML2_Map_free(ML2_Map *map) {
+	if (!map) return;
 	TileSheet_destroy(map->tiles);
 	SDL_free(map);
 }

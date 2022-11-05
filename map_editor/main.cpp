@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 
 #include <SDL.h>
@@ -13,6 +14,8 @@
 #if !SDL_VERSION_ATLEAST(2,0,17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
+
+static char file_path[PATH_MAX] = ""; // File path for the currently open map
 
 void new_window(bool *open) {
 	if (!ImGui::Begin("Create New Map", open)) {
@@ -34,20 +37,59 @@ void new_window(bool *open) {
 }
 
 void open_window(bool *open, ML2_Map **map, SDL_Renderer *renderer) {
-	if (!ImGui::Begin("Open Map", open)) {
+	if (!ImGui::Begin("Open Map")) {
 		ImGui::End();
 		return;
 	}
 	
-	static char path[PATH_MAX];
-	ImGui::InputText("Path", path, PATH_MAX);
+	static char working_path[PATH_MAX];
+	static bool refresh_text = true;
+	
+	if (refresh_text) {
+		strncpy(working_path, file_path, PATH_MAX);
+		refresh_text = false;
+	}
+	
+	ImGui::InputText("Path", working_path, PATH_MAX);
 	if (ImGui::Button("Open")) {
 		ML2_Map_free(*map);
-		*map = ML2_Map_loadFromFile(path, renderer);
+		strncpy(file_path, working_path, PATH_MAX);
+		refresh_text = true;
+		*map = ML2_Map_loadFromFile(file_path, renderer);
 		*open = false;
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Cancel")) {
+		refresh_text = true;
+		*open = false;
+	}
+	ImGui::End();
+}
+
+void save_as_window(bool *open, ML2_Map *map) {
+	if (!ImGui::Begin("Save As")) {
+		ImGui::End();
+		return;
+	}
+	
+	static char working_path[PATH_MAX];
+	static bool refresh_text = true;
+	
+	if (refresh_text) {
+		strncpy(working_path, file_path, PATH_MAX);
+		refresh_text = false;
+	}
+	
+	ImGui::InputText("Path", working_path, PATH_MAX);
+	if (ImGui::Button("Save")) {
+		strncpy(file_path, working_path, PATH_MAX);
+		refresh_text = true;
+		ML2_Map_save(map, file_path);
+		*open = false;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel")) {
+		refresh_text = true;
 		*open = false;
 	}
 	ImGui::End();
@@ -101,13 +143,15 @@ int main(int argc, char *argv[]) {
 	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
 	ImGui_ImplSDLRenderer_Init(renderer);
 	
-	// Load map
-	ML2_Map *map = ML2_Map_loadFromFile("test4.ml2", renderer);
+	// Map state
+	ML2_Map *map = nullptr;
 	SDL_Point camera_pos = {0, 0};
 	SDL_Point tile_pos = {0, 0};
 	
+	// Open window state
 	bool show_new_window = false;
 	bool show_open_window = false;
+	bool show_save_as_window = false;
 	bool show_about_window = false;
 	bool dark_theme = false;
 	
@@ -137,10 +181,11 @@ int main(int argc, char *argv[]) {
 					show_open_window = true;
 				}
 				if (ImGui::MenuItem("Save")) {
-					ML2_Map_save(map, "test5.ml2");
+					if (map) ML2_Map_save(map, file_path);
+					else show_save_as_window = true;
 				}
 				if (ImGui::MenuItem("Save As")) {
-					// file dialog of some sort
+					show_save_as_window = true;
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Quit")) {
@@ -170,6 +215,7 @@ int main(int argc, char *argv[]) {
 		
 		if (show_new_window) new_window(&show_new_window);
 		if (show_open_window) open_window(&show_open_window, &map, renderer);
+		if (show_save_as_window) save_as_window(&show_save_as_window, map);
 		if (show_about_window) about_window(&show_about_window);
 		
 #define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a
