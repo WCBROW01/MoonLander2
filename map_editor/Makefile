@@ -23,7 +23,7 @@ SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_
 OBJS = $(SOURCES:.cpp=.o) $(GAME_DIR)/map.o $(GAME_DIR)/tilesheet.o
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(GAME_DIR) sdl2-config --cflags
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(GAME_DIR) `sdl2-config --cflags`
 CXXFLAGS += -Os -Wall -Wformat
 LIBS =
 
@@ -35,7 +35,7 @@ ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
 	LIBS += `sdl2-config --libs`
 
-	CXXFLAGS += `sdl2-config --cflags` -flto
+	CXXFLAGS += -flto
 endif
 
 ifeq ($(UNAME_S), Darwin) #APPLE
@@ -48,7 +48,7 @@ endif
 
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
-	LIBS += -lgdi32 -lopengl32 -limm32 `pkg-config --static --libs sdl2`
+	LIBS += `sdl2-config --static-libs`
 endif
 
 ##---------------------------------------------------------------------
