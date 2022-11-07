@@ -14,18 +14,18 @@
 #CXX = g++
 #CXX = clang++
 
-EXE = ml2-editor
+EXE = ../ml2-editor
 IMGUI_DIR = imgui
-GAME_DIR = ../src
+LIB_DIR = ../shared
 SOURCES = main.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_sdlrenderer.cpp
-OBJS = $(SOURCES:.cpp=.o) $(GAME_DIR)/map.o $(GAME_DIR)/tilesheet.o
+OBJS = $(SOURCES:.cpp=.o)
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(GAME_DIR) `sdl2-config --cflags`
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(LIB_DIR) `sdl2-config --cflags`
 CXXFLAGS += -Os -Wall -Wformat
-LIBS =
+LDFLAGS =
 
 ##---------------------------------------------------------------------
 ## BUILD FLAGS PER PLATFORM
@@ -33,22 +33,22 @@ LIBS =
 
 ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
-	LIBS += `sdl2-config --libs`
+	LDFLAGS += `sdl2-config --libs`
 
 	CXXFLAGS += -flto
 endif
 
 ifeq ($(UNAME_S), Darwin) #APPLE
 	ECHO_MESSAGE = "Mac OS X"
-	LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo `sdl2-config --libs`
-	LIBS += -L/usr/local/lib -L/opt/local/lib
+	LDFLAGS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo `sdl2-config --libs`
+	LDFLAGS += -L/usr/local/lib -L/opt/local/lib
 
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include
 endif
 
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
-	LIBS += `sdl2-config --static-libs`
+	LDFLAGS += `sdl2-config --static-libs`
 endif
 
 ##---------------------------------------------------------------------
@@ -67,8 +67,8 @@ endif
 all: $(EXE)
 	@echo Build complete for $(ECHO_MESSAGE)
 
-$(EXE): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+$(EXE): $(OBJS) ../libML2.a
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 clean:
 	rm -f $(EXE) $(OBJS)
