@@ -9,6 +9,7 @@
 #include "imgui_impl_sdlrenderer.h"
 
 #include "tilesheet.h"
+#include "tiles.h"
 #include "map.h"
 
 #if !SDL_VERSION_ATLEAST(2,0,17)
@@ -95,6 +96,35 @@ void save_as_window(bool *open, ML2_Map *map) {
 	ImGui::End();
 }
 
+void tiles_window(bool *open, ML2_Map *map, int *selected_tile) {
+	if (!ImGui::Begin("Tiles", open)) {
+		ImGui::End();
+		return;
+	}
+	
+	if (map) {
+		int ts_w = map->tiles->tile_width * map->tiles->sheet_width;
+		int ts_h = map->tiles->tile_height * map->tiles->sheet_height;
+		for (size_t i = 0; i < TILE_COUNT; ++i) {
+			SDL_Rect clip = TileSheet_getTileRect(map->tiles, i);
+			ImVec2 uv0 = ImVec2((float) clip.x / ts_w, (float) clip.y / ts_h);
+			ImVec2 uv1 = ImVec2((float) (clip.x + clip.w) / ts_w, (float) (clip.y + clip.h) / ts_h);
+			
+			ImGui::PushID(i);
+			bool selected = *selected_tile == i;
+			if (selected) ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+			if (ImGui::ImageButton("##tile", map->tiles->texture, ImVec2(map->tiles->tile_width, map->tiles->tile_height), uv0, uv1)) {
+				*selected_tile = i;
+			}
+			if (selected) ImGui::PopStyleColor();
+			ImGui::PopID();
+			ImGui::SameLine();
+		}
+	}
+	
+	ImGui::End();
+}
+
 void about_window(bool *open) {
 	if (!ImGui::Begin("About ML2 Editor", open)) {
 		// Don't render window if collapsed
@@ -145,6 +175,7 @@ int main(int argc, char *argv[]) {
 	
 	// Map state
 	ML2_Map *map = nullptr;
+	int selected_tile = 0;
 	SDL_Point camera_pos = {0, 0};
 	SDL_Point tile_pos = {0, 0};
 	
@@ -152,6 +183,7 @@ int main(int argc, char *argv[]) {
 	bool show_new_window = false;
 	bool show_open_window = false;
 	bool show_save_as_window = false;
+	bool show_tiles_window = false;
 	bool show_about_window = false;
 	bool dark_theme = false;
 	
@@ -201,6 +233,9 @@ int main(int argc, char *argv[]) {
 						ImGui::StyleColorsLight();
 					}
 				}
+				if (ImGui::MenuItem("Tiles")) {
+					show_tiles_window = true;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Help")) {
@@ -212,10 +247,10 @@ int main(int argc, char *argv[]) {
 			ImGui::EndMainMenuBar();
 		}
 		
-		
 		if (show_new_window) new_window(&show_new_window);
 		if (show_open_window) open_window(&show_open_window, &map, renderer);
 		if (show_save_as_window) save_as_window(&show_save_as_window, map);
+		if (show_tiles_window) tiles_window(&show_tiles_window, map, &selected_tile);
 		if (show_about_window) about_window(&show_about_window);
 		
 #define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a
@@ -249,8 +284,8 @@ int main(int argc, char *argv[]) {
 				};
 				
 				if (mouse_state & SDL_BUTTON_LMASK) {
-					ML2_Map_setTile(map, tile_pos.x, tile_pos.y, 1, 0);
-				} else if (mouse_state & SDL_BUTTON_MMASK) {
+					ML2_Map_setTile(map, tile_pos.x, tile_pos.y, selected_tile, 0);
+				} else if (mouse_state & SDL_BUTTON_RMASK) {
 					camera_pos.x -= mouse_rel_x;
 					if (camera_pos.x < 0) {
 						camera_pos.x = 0;
@@ -264,8 +299,6 @@ int main(int argc, char *argv[]) {
 					} else if ((unsigned) camera_pos.y > map->height * map->tiles->tile_height * MAP_RENDER_SCALE - render_h) {
 						camera_pos.y = map->height * map->tiles->tile_height * MAP_RENDER_SCALE - render_h;
 					}
-				} else if (mouse_state & SDL_BUTTON_RMASK) {
-					ML2_Map_setTile(map, tile_pos.x, tile_pos.y, 0, 0);
 				}
 				
 				SDL_Rect highlight_rect = {

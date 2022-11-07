@@ -43,7 +43,7 @@ enum builtin_tilesheets {
 static_assert(TILESHEET_COUNT == 2, "Exhaustive handling of tilesets in TILESHEET_PATHS");
 
 static const char *TILESHEET_PATHS[TILESHEET_COUNT] = {
-	[TILESHEET_MOON] = "tiles/moon.bmp"
+	NULL, "tiles/moon.bmp"
 };
 
 #ifdef __cplusplus
