@@ -26,18 +26,18 @@ TileSheet *TileSheet_createFromSurface(
 	// 0x00FF00 will be used as a key for transparency.
 	SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
 	
-	
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 	if (!texture) return NULL;
 	
 	TileSheet *tilesheet = SDL_malloc(sizeof(TileSheet));
 	if (!tilesheet) {
 		SDL_DestroyTexture(texture);
+		if (flags & TILESHEET_FREESURFACE) SDL_FreeSurface(surface);
 		SDL_SetError("Failed to allocate memory for tilesheet.");
 		return NULL;
 	} else {
 		*tilesheet = (TileSheet) {
-			.texture = SDL_CreateTextureFromSurface(renderer, surface),
+			.texture = texture,
 			.tile_width = tile_width,
 			.tile_height = tile_height,
 			.sheet_width = surface->w / tile_width,
