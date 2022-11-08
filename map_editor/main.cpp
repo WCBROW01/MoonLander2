@@ -18,16 +18,47 @@
 
 static char file_path[PATH_MAX] = ""; // File path for the currently open map
 
-void new_window(bool *open) {
+void new_window(bool *open, ML2_Map **map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
 	if (!ImGui::Begin("Create New Map", open)) {
 		ImGui::End();
 		return;
 	}
 
-	static int w, h;
+	static int w, h, start_fuel;
 	ImGui::InputInt("Width", &w);
 	ImGui::InputInt("Height", &h);
+	ImGui::InputInt("Starting Fuel", &start_fuel);
+	
+	static float col[3];
+	ImGui::ColorEdit3("Background Color", col, 0);
+	
+	static enum builtin_tilesheets ts = TILESHEET_MOON;
+	ImGui::Text("Tilesheet");
+	if (ImGui::RadioButton("Moon", ts == TILESHEET_MOON)) ts = TILESHEET_MOON;
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Custom", ts == TILESHEET_CUSTOM)) ts = TILESHEET_CUSTOM;
+	
+	static char ts_path[PATH_MAX];
+	if (ts != TILESHEET_CUSTOM) ImGui::BeginDisabled();
+	ImGui::InputText("Path", ts_path, PATH_MAX);
+	if (ts != TILESHEET_CUSTOM) ImGui::EndDisabled();
+	
 	if (ImGui::Button("Create")) {
+		ML2_Map params = {
+			.width = w,
+			.height = h,
+			.start_x = 5,
+			.start_y = 6,
+			.start_fuel = start_fuel,
+			.bgcolor = {col[0] * 255, col[1] * 255, col[2] * 255, 255},
+			.tiles = ts ? nullptr : TileSheet_create(ts_path, renderer, 16, 16, TILESHEET_CREATESURFACE),
+			.tilesheet_enum = ts
+		};
+		
+		ML2_Map_free(*map);
+		*map = ML2_Map_create(params, renderer);
+		if (!*map) fprintf(stderr, "SDL_Map_create: %s\n", SDL_GetError());
+		*camera_pos = {0, 0};
 		*open = false;
 	}
 	ImGui::SameLine();
@@ -184,6 +215,7 @@ int main(int argc, char *argv[]) {
 	bool show_open_window = false;
 	bool show_save_as_window = false;
 	bool show_tiles_window = false;
+	bool show_demo_window = false;
 	bool show_about_window = false;
 	bool dark_theme = false;
 	
@@ -239,6 +271,9 @@ int main(int argc, char *argv[]) {
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Help")) {
+				if (ImGui::MenuItem("Demo Window")) {
+					show_demo_window = true;
+				}
 				if (ImGui::MenuItem("About")) {
 					show_about_window = true;
 				}
@@ -247,10 +282,11 @@ int main(int argc, char *argv[]) {
 			ImGui::EndMainMenuBar();
 		}
 		
-		if (show_new_window) new_window(&show_new_window);
+		if (show_new_window) new_window(&show_new_window, &map, renderer, &camera_pos);
 		if (show_open_window) open_window(&show_open_window, &map, renderer);
 		if (show_save_as_window) save_as_window(&show_save_as_window, map);
 		if (show_tiles_window) tiles_window(&show_tiles_window, map, &selected_tile);
+		if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 		if (show_about_window) about_window(&show_about_window);
 		
 #define UNPACK_COLOR(color) (color).r, (color).g, (color).b, (color).a

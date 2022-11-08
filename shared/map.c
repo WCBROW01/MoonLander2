@@ -19,6 +19,27 @@
 #define CORRECT_SIG 0x00324C4D
 #endif
 
+#define CURRENT_REV 2
+
+ML2_Map *ML2_Map_create(ML2_Map params, SDL_Renderer *renderer) {
+	params.rev = CURRENT_REV;
+	if (params.tilesheet_enum) {
+		params.tiles = TileSheet_create(TILESHEET_PATHS[params.tilesheet_enum], renderer, 16, 16, TILESHEET_CREATESURFACE);
+	}
+	if (!params.tiles) return NULL;
+
+	size_t map_size = params.width * params.height;
+	ML2_Map *map = SDL_malloc(sizeof(ML2_Map) + map_size);
+	if (!map) {
+		SDL_SetError("Failed to create map: not enough memory.");
+		return NULL;
+	}
+	
+	*map = params;
+	memset(map->data, 0, map_size);
+	return map;
+}
+
  /* Load the contents of a map from RWops into memory so it can be used in-game.
  * If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. */
@@ -155,7 +176,8 @@ SDL_bool ML2_Map_save(ML2_Map *map, const char *path) {
 
 	// This intermediate header is here so we don't change byte order in the working copy
 	ML2_Map saved_header = {
-		.rev = SDL_SwapLE32(map->rev),
+		// Since it is a working spec, we assume you want the latest one.
+		.rev = SDL_SwapLE32(CURRENT_REV),
 		.width = SDL_SwapLE32(map->width),
 		.height = SDL_SwapLE32(map->height),
 		.start_x = SDL_SwapLE32(map->start_x),

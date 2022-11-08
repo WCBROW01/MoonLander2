@@ -38,6 +38,15 @@ typedef struct {
 } ML2_Map;
 
 /**
+ * @brief Create an empty map
+ *
+ * @param params ML2_Map struct to use as a template
+ * @param renderer Renderer to associate the loaded tilesheet with
+ * @return The newly created map object
+ */
+ML2_Map *ML2_Map_create(ML2_Map params, SDL_Renderer *renderer);
+
+/**
  * @brief Load the contents of a map from RWops into memory so it can be used in-game.
  * @details If there is an error or the loaded map is invalid, the SDL error state
  * will be set and a null pointer will be returned. 
