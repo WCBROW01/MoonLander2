@@ -52,7 +52,7 @@ static void new_render_texture(void) {
 	}
 }
 
-static void init_game(void) {
+static void init_game(const char *map_path) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
 		exit(1);
@@ -78,7 +78,7 @@ static void init_game(void) {
 		exit(1);
 	}
 
-	map = ML2_Map_loadFromFile("test4.ml2", renderer);
+	map = ML2_Map_loadFromFile(map_path, renderer);
 
 	atexit(exit_game);
 }
@@ -257,8 +257,10 @@ static void game_loop(void) {
 	Lander_destroy(l);
 }
 
-int main(int, char **) {
-	init_game();
+int main(int, char *argv[]) {
+	
+	const char *map_path = argv[1] ? argv[1] : "test4.ml2"; 
+	init_game(map_path);
 	title_screen();
 	game_loop();
 	return 0;
