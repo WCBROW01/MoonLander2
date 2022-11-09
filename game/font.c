@@ -21,10 +21,11 @@ void Font_destroy(Font *font) {
 	TileSheet_destroy(font);
 }
 
-void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *text) {
+SDL_Rect Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *text) {
 	const SDL_Point orig_p = dst_point == NULL ? (SDL_Point) {0} : *dst_point;
 	SDL_Point p = orig_p;
 
+	int max_x = p.x;
 	for (const char *c = text; *c != '\0'; ++c) {
 		if (*c < 33) {
 			switch (*c) {
@@ -38,6 +39,7 @@ void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_po
 				p.y += 8;
 				// fall through
 			case '\r':
+				if (p.x > max_x) max_x = p.x;
 				p.x = orig_p.x;
 				break;
 			case ' ':
@@ -51,15 +53,25 @@ void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_po
 			p.x += 8;
 		}
 	}
+	
+	if (p.x > max_x) max_x = p.x;
+	
+	return (SDL_Rect) {
+		.x = orig_p.x,
+		.y = orig_p.y,
+		.w = max_x - orig_p.x,
+		.h = p.y - orig_p.y + 8
+	};
 }
 
-void Font_renderFormatted(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *format, ...) {
+SDL_Rect Font_renderFormatted(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *format, ...) {
 	va_list ap;
 	char *text;
 	va_start(ap, format);
 	SDL_vasprintf(&text, format, ap);
 	va_end(ap);
 
-	Font_renderText(font, renderer, dst_point, text);
+	SDL_Rect r = Font_renderText(font, renderer, dst_point, text);
 	SDL_free(text);
+	return r;
 }

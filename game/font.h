@@ -37,8 +37,9 @@ void Font_destroy(Font *font);
  * @param renderer The renderer to render to
  * @param dst_point The start coordinate in the renderer (top-left) for the text.
  * @param text String containing the text to render
+ * @return A rectangle containing the bounds of the rendered text
  */
-void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *text);
+SDL_Rect Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *text);
 
 /**
  * @brief Render a printf-style formatted string using a font.
@@ -48,7 +49,8 @@ void Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_po
  * @param dst_point The start coordinate in the renderer (top-left) for the text.
  * @param format The printf-style format argument
  * @param ... All other printf-style arguments
+ * @return A rectangle containing the bounds of the rendered text
  */
-void Font_renderFormatted(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *format, ...);
+SDL_Rect Font_renderFormatted(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *format, ...);
 
 #endif
