@@ -176,10 +176,15 @@ static void render_hud(float speed, float fuel) {
 
 static void game_loop(void) {
 	Lander *l = Lander_create(renderer, map);
+	Uint64 game_time = SDL_GetTicks64();
 	SDL_Event e;
 	SDL_bool quit = SDL_FALSE;
 	SDL_bool using_mouse = SDL_FALSE;
 	while (!quit) {
+		Uint64 prev_time = game_time;
+		game_time = SDL_GetTicks64();
+		Uint64 delta = game_time - prev_time;
+	
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = SDL_TRUE;
 			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
@@ -226,7 +231,7 @@ static void game_loop(void) {
 				using_mouse = SDL_TRUE;
 			}
 		}
-		
+		Lander_physics(l, delta);
 		SDL_Point lander_point = {l->pos_x, l->pos_y};
 		SDL_Point camera_pos = get_camera_pos(&lander_point);
 		

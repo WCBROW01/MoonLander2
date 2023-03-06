@@ -23,7 +23,6 @@ typedef struct {
 	SDL_Renderer *renderer; ///< The renderer the lander is being rendered on
 	TileSheet *sprite_sheet; ///< The sprite sheet for the lander
 	ML2_Map *map; ///< The map the lander is present on (used for collision)
-	SDL_TimerID timer; ///< Timer for the physics routine
 	float pos_x; ///< x position of the lander
 	float pos_y; ///< y position of the lander
 	float vel_x; ///< x velocity of the lander
@@ -34,7 +33,8 @@ typedef struct {
 	float vel_fuel_x; ///< fuel component of the lander's velocity, x direction
 	float vel_fuel_y; ///< fuel component of the lander's velocity, y direction
 	float fuel_level; ///< fuel level of the lander
-	char anim_frame, anim_timer; ///< Animation state
+	char anim_frame; ///< Current frame of animation
+	char anim_timer; ///< Time on current frame
 	char turning; ///< The direction the player is turning
 	SDL_bool state; ///< Whether the player is accelerating
 	SDL_bool fast; ///< Whether the player is going fast
@@ -62,6 +62,14 @@ void Lander_destroy(Lander *l);
  * @param l The lander object to reset.
  */
 void Lander_reset(Lander *l);
+
+/**
+ * @brief Run physics calculations for the current frame
+ *
+ * @param l The lander object to do physics calculations on
+ * @param delta The amount of time since the last frame
+ */
+void Lander_physics(Lander *l, Uint64 delta);
 
 /**
  * @brief Render the lander on-screen.

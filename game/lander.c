@@ -20,48 +20,44 @@
 #include "map.h"
 
 #define ACCEL 50.0f
-#define TICKRATE 250
-#define MS_PER_TICK (1000 / TICKRATE)
 #define GRAVITY 16.2f
-#define ANIM_RATE 15
-#define ANIM_TIME (TICKRATE / ANIM_RATE)
+#define ANIM_TIME 60
 
 #define RTOD(x) ((x) * 180 / M_PI)
 #define CMP_ZERO(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-static Uint32 Lander_physics(Uint32 interval, void *param) {
-	Lander *l = (Lander*) param;
-
-	l->angle -= l->turning * 0.01f;
+void Lander_physics(Lander *l, Uint64 delta_ms) {
+	float delta = delta_ms / 1000.0f;
+	l->angle -= l->turning * delta * 2.5f;
 
 	if (l->state && l->fuel_level > 0.0f) {
 		// if the fast flag is active (left shift being held) multiply accel by 3
-		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_cosf(l->angle);
-		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL / TICKRATE * SDL_sinf(l->angle);
-		++l->anim_timer;
-		if (l->anim_timer == ANIM_TIME) {
+		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL * delta * SDL_cosf(l->angle);
+		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL * delta * SDL_sinf(l->angle);
+		l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.75f + 1.0f) * 0.5f * delta : 0.0f;
+		
+		l->anim_timer += delta_ms;
+		if (l->anim_timer >= ANIM_TIME) {
 			++l->anim_frame;
 			l->anim_frame %= l->sprite_sheet->sheet_width - 1;
-			l->anim_timer = 0;
-
-			l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.75f + 1.0f) * 10.0f / TICKRATE : 0.0f;
+			l->anim_timer %= l->anim_timer;
 		}
 	} else {
-		l->vel_fuel_x -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabsf(SDL_cosf(l->angle));
-		l->vel_fuel_y -= ACCEL / TICKRATE / 2.0f * CMP_ZERO(l->vel_fuel_y) * SDL_fabsf(SDL_sinf(l->angle));
+		l->vel_fuel_x -= ACCEL * delta / 2.0f * CMP_ZERO(l->vel_fuel_x) * SDL_fabsf(SDL_cosf(l->angle));
+		l->vel_fuel_y -= ACCEL * delta / 2.0f * CMP_ZERO(l->vel_fuel_y) * SDL_fabsf(SDL_sinf(l->angle));
 		l->anim_frame = 0;
 	}
 
 	if (l->fuel_level < 0.0f) l->fuel_level = 0.0f;
 
-	l->vel_grav -= GRAVITY / TICKRATE;
+	l->vel_grav -= GRAVITY * delta;
 	l->vel_x = l->vel_fuel_x;
 	l->vel_y = l->vel_fuel_y + l->vel_grav;
 	l->speed = SDL_fabsf(SDL_roundf(SDL_sqrtf(l->vel_x * l->vel_x + l->vel_y * l->vel_y)));
 
 	SDL_Rect collision_rect_old = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
-	l->pos_x += l->vel_x / TICKRATE;
-	l->pos_y += l->vel_y / TICKRATE;
+	l->pos_x += l->vel_x * delta;
+	l->pos_y += l->vel_y * delta;
 	
 	// Make the lander wrap around the map horizontally
 	if (l->pos_x > l->map->width * l->map->tiles->tile_width)
@@ -72,17 +68,15 @@ static Uint32 Lander_physics(Uint32 interval, void *param) {
 	SDL_Rect collision_rect = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
 	int collision = ML2_Map_doCollision(l->map, &collision_rect, &collision_rect_old);
 	if (collision & ML2_MAP_COLLIDED_X) {
-		l->pos_x -= l->vel_x / TICKRATE;
+		l->pos_x -= l->vel_x * delta;
 		l->vel_fuel_x /= 2.0f;
 	}
 	
 	if (collision & ML2_MAP_COLLIDED_Y) {
-		l->pos_y -= l->vel_y / TICKRATE;
+		l->pos_y -= l->vel_y * delta;
 		l->vel_fuel_y /= 2.0f;
 		l->vel_grav = 0.0f;
 	}
-	
-	return interval;
 }
 
 Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map) {
@@ -94,12 +88,10 @@ Lander *Lander_create(SDL_Renderer *renderer, ML2_Map *map) {
 	};
 
 	Lander_reset(l);
-	l->timer = SDL_AddTimer(MS_PER_TICK, Lander_physics, l);
 	return l;
 }
 
 void Lander_destroy(Lander *l) {
-	SDL_RemoveTimer(l->timer);
 	TileSheet_destroy(l->sprite_sheet);
 	SDL_free(l);
 }
