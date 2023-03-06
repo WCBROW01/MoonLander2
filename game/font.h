@@ -12,27 +12,27 @@
 #include "tilesheet.h"
 
 /// @brief This is implemented as an abstraction of tilesheets.
-typedef TileSheet Font;
+typedef struct Font Font;
 
 /**
  * @brief Create a font object
- * 
+ *
  * @param file_path Path to a Windows bitmap file containing the font
  * @param renderer Renderer to create the font on
  * @return The newly created font object
  */
-Font *Font_create(const char *file_path, SDL_Renderer *renderer);
+Font *Font_create(const char *file_path, SDL_Renderer *renderer, int scale);
 
 /**
  * @brief Free all resources associated with a font object
- * 
+ *
  * @param font The font object to destroy
  */
 void Font_destroy(Font *font);
 
 /**
  * @brief Render text using a font.
- * 
+ *
  * @param font The font to use
  * @param renderer The renderer to render to
  * @param dst_point The start coordinate in the renderer (top-left) for the text.
@@ -43,7 +43,7 @@ SDL_Rect Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *ds
 
 /**
  * @brief Render a printf-style formatted string using a font.
- * 
+ *
  * @param font The font to use
  * @param renderer The renderer to render to
  * @param dst_point The start coordinate in the renderer (top-left) for the text.

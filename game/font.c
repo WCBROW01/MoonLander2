@@ -13,12 +13,21 @@
 #include "tilesheet.h"
 #include "font.h"
 
-Font *Font_create(const char *file_path, SDL_Renderer *renderer) {
-	return TileSheet_create(file_path, renderer, 8, 8, 0);
+struct Font {
+    TileSheet *ts;
+    int scale;
+};
+
+Font *Font_create(const char *file_path, SDL_Renderer *renderer, int scale) {
+    Font *ret = malloc(sizeof(Font));
+	ret->ts = TileSheet_create(file_path, renderer, 8, 8, 0);
+	ret->scale = scale;
+	return ret;
 }
 
 void Font_destroy(Font *font) {
-	TileSheet_destroy(font);
+	TileSheet_destroy(font->ts);
+	free(font);
 }
 
 SDL_Rect Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *dst_point, const char *text) {
@@ -30,37 +39,37 @@ SDL_Rect Font_renderText(Font *font, SDL_Renderer *renderer, const SDL_Point *ds
 		if (*c < 33) {
 			switch (*c) {
 			case '\b':
-				p.x -= 8;
+				p.x -= 8 * font->scale;
 				break;
 			case '\t':
-				p.x += 32;
+				p.x += 32 * font->scale;
 				break;
 			case '\n':
-				p.y += 8;
+				p.y += 8 * font->scale;
 				// fall through
 			case '\r':
 				if (p.x > max_x) max_x = p.x;
 				p.x = orig_p.x;
 				break;
 			case ' ':
-				p.x += 8;
+				p.x += 8 * font->scale;
 				break;
 			}
 		} else {
-			SDL_Rect src = TileSheet_getTileRect(font, *c - 33);
-			SDL_Rect dst = {.x = p.x, .y = p.y, .w = 8, .h = 8};
-			SDL_RenderCopy(renderer, font->texture, &src, &dst);
-			p.x += 8;
+			SDL_Rect src = TileSheet_getTileRect(font->ts, *c - 33);
+			SDL_Rect dst = {.x = p.x, .y = p.y, .w = 8 * font->scale, .h = 8 * font->scale};
+			SDL_RenderCopy(renderer, font->ts->texture, &src, &dst);
+			p.x += 8 * font->scale;
 		}
 	}
-	
+
 	if (p.x > max_x) max_x = p.x;
-	
+
 	return (SDL_Rect) {
 		.x = orig_p.x,
 		.y = orig_p.y,
 		.w = max_x - orig_p.x,
-		.h = p.y - orig_p.y + 8
+		.h = p.y - orig_p.y + 8 * font->scale
 	};
 }
 

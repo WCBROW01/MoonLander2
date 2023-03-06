@@ -72,7 +72,7 @@ static void init_game(const char *map_path) {
 	// This texture will be used as a buffer for rendering.
 	new_render_texture();
 	
-	font = Font_create("font.bmp", renderer);
+	font = Font_create("font.bmp", renderer, 1);
 	if (!font) {
 		fprintf(stderr, "Font_create: %s\n", SDL_GetError());
 		exit(1);
