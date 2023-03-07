@@ -12,15 +12,21 @@ else
 	LDFLAGS = `sdl2-config --libs`
 endif
 
+all: moonlander ml2-editor docs
+
 moonlander: $(GAME_OBJ) libML2.a
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 libML2.a: $(LIB_OBJ)
 	ar rcs libML2.a $(LIB_OBJ)
 
-.PHONY: clean ml2-editor
+docs: Doxyfile
+	doxygen
+
+.PHONY: clean ml2-editor docs
 ml2-editor: libML2.a
 	cd map_editor && $(MAKE)
 
+
 clean:
-	rm -f $(GAME_OBJ) $(LIB_OBJ) moonlander libML2.a && cd map_editor && $(MAKE) clean
+	rm -rf $(GAME_OBJ) $(LIB_OBJ) moonlander libML2.a docs && cd map_editor && $(MAKE) clean
