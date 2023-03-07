@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Moon Lander 2"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Sequel to the legendary project from fall 2021."
+PROJECT_BRIEF          = "Sequel to the legendary project from spring 2021."
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = "docs"
 CREATE_SUBDIRS         = NO
