@@ -2,16 +2,18 @@
  * @file
  * @brief Abstractions for using bitmap fonts.
  * @author Will Brown
- * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2023 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
 #ifndef MOONLANDER_FONT_H
 #define MOONLANDER_FONT_H
 
-#include "tilesheet.h"
-
-/// @brief This is implemented as an abstraction of tilesheets.
+/**
+ * @brief This is implemented on top of tilesheets.
+ * @details This used to just be a typedef of the TileSheet type,
+ * but this is now its own structure.
+ */
 typedef struct Font Font;
 
 /**
@@ -19,6 +21,7 @@ typedef struct Font Font;
  *
  * @param file_path Path to a Windows bitmap file containing the font
  * @param renderer Renderer to create the font on
+ * @param scale Integer scale factor
  * @return The newly created font object
  */
 Font *Font_create(const char *file_path, SDL_Renderer *renderer, int scale);

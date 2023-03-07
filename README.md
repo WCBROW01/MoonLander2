@@ -38,7 +38,7 @@ sudo apt install libsdl2-dev
 
 ## Building using Visual Studio
 
-Building the project under Visual Studio is a bit more complicated, since it isn't my main development platform. (Currently, this is Ubuntu 22.04.)
+Building the project under Visual Studio is a bit more complicated, since it isn't my main development platform. (Currently, this is Ubuntu 22.10.)
 However, it is at least possible to do, and may be refined in the future. If this breaks, please let me know, or send in a contribution to fix it.
 
 If your system isn't already set up to use the SDL 2 library, you can provide a specific build for the project yourself somewhat easily.

@@ -2,6 +2,8 @@
 
 Revision 2
 
+Note: The revision will be reset to 1 and all compatibility code will be removed from the loader once the code goes public.
+
 ## Overview
 
 This is the spec for the ML2 map file, a file format created for Moon Lander 2 project by Will Brown. The goal is to be a simple, fast format for storing tile-based maps. This might see use in other projects that use a similar or identical tile-based renderer. It is supposed to be easy to use with the C programming language, and easy to unpack into a C-style struct, so it is a custom binary format that makes no use of any existing standards or any currently popular container formats. Most of these would be too slow, too difficult to implement to be worth the effort, or too space-inefficient. Many existing formats are much more complicated than is needed for a simple tile-based renderer like this one.

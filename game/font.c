@@ -2,7 +2,7 @@
  * @file
  * @brief Abstractions for using bitmap fonts.
  * @author Will Brown
- * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2023 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
@@ -13,9 +13,12 @@
 #include "tilesheet.h"
 #include "font.h"
 
+/**
+ * @brief This is implemented on top of tilesheets.
+ */
 struct Font {
-    TileSheet *ts;
-    int scale;
+    TileSheet *ts; ///< TileSheet of the font
+    int scale; ///< Integer scale factor
 };
 
 Font *Font_create(const char *file_path, SDL_Renderer *renderer, int scale) {

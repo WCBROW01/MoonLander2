@@ -3,7 +3,7 @@
  * @brief Source code for the Lander object.
  * @author Will Brown
  * @author Jerrin Redmon
- * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2023 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
@@ -27,7 +27,7 @@
 #define CMP_ZERO(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
 void Lander_physics(Lander *l, Uint64 delta_ms) {
-	float delta = delta_ms / 1000.0f;
+	float delta = delta_ms / 1000.0f; // delta in seconds (as float)
 	l->angle -= l->turning * delta * 2.5f;
 
 	if (l->state && l->fuel_level > 0.0f) {
@@ -35,7 +35,7 @@ void Lander_physics(Lander *l, Uint64 delta_ms) {
 		l->vel_fuel_x += (l->fast * 1.25f + 1.0f) * ACCEL * delta * SDL_cosf(l->angle);
 		l->vel_fuel_y += (l->fast * 1.25f + 1.0f) * ACCEL * delta * SDL_sinf(l->angle);
 		l->fuel_level = l->fuel_level > 0.0f ? l->fuel_level - ACCEL * (l->fast * 1.75f + 1.0f) * 0.5f * delta : 0.0f;
-		
+
 		l->anim_timer += delta_ms;
 		if (l->anim_timer >= ANIM_TIME) {
 			++l->anim_frame;
@@ -58,7 +58,7 @@ void Lander_physics(Lander *l, Uint64 delta_ms) {
 	SDL_Rect collision_rect_old = {l->pos_x, l->pos_y, LANDER_WIDTH, LANDER_HEIGHT};
 	l->pos_x += l->vel_x * delta;
 	l->pos_y += l->vel_y * delta;
-	
+
 	// Make the lander wrap around the map horizontally
 	if (l->pos_x > l->map->width * l->map->tiles->tile_width)
 		l->pos_x -= l->map->width * l->map->tiles->tile_width;
@@ -71,7 +71,7 @@ void Lander_physics(Lander *l, Uint64 delta_ms) {
 		l->pos_x -= l->vel_x * delta;
 		l->vel_fuel_x /= 2.0f;
 	}
-	
+
 	if (collision & ML2_MAP_COLLIDED_Y) {
 		l->pos_y -= l->vel_y * delta;
 		l->vel_fuel_y /= 2.0f;
@@ -121,7 +121,7 @@ void Lander_render(Lander *l, SDL_Point *camera_pos) {
 		.w = LANDER_WIDTH,
 		.h = LANDER_HEIGHT
 	};
-	
+
 	SDL_Rect sprite = TileSheet_getTileRect(l->sprite_sheet, l->fuel_level > 0.0f ? l->sprite_sheet->sheet_width * l->fast + l->state * (l->anim_frame + 1) : 0);
 
 	/* RenderCopyEx uses angle in an entirely different way from how I'm calculating it.

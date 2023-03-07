@@ -3,7 +3,7 @@
  * @brief Entrypoint for the game.
  * @author Will Brown
  * @author Jerrin Redmon
- * @copyright Licensed under the GNU General Public License v3 (c) 2022 Will Brown
+ * @copyright Licensed under the GNU General Public License v3 (c) 2023 Will Brown
  * See LICENSE or <https://www.gnu.org/licenses/>
  */
 
@@ -71,7 +71,7 @@ static void init_game(const char *map_path) {
 
 	// This texture will be used as a buffer for rendering.
 	new_render_texture();
-	
+
 	font = Font_create("font.bmp", renderer, 1);
 	if (!font) {
 		fprintf(stderr, "Font_create: %s\n", SDL_GetError());
@@ -184,7 +184,7 @@ static void game_loop(void) {
 		Uint64 prev_time = game_time;
 		game_time = SDL_GetTicks64();
 		Uint64 delta = game_time - prev_time;
-	
+
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = SDL_TRUE;
 			else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) switch (e.key.keysym.sym) {
@@ -234,7 +234,7 @@ static void game_loop(void) {
 		Lander_physics(l, delta);
 		SDL_Point lander_point = {l->pos_x, l->pos_y};
 		SDL_Point camera_pos = get_camera_pos(&lander_point);
-		
+
 		if (using_mouse) {
 			int mouse_x, mouse_y;
 			SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -250,7 +250,7 @@ static void game_loop(void) {
 		// Render black background
 		SDL_SetRenderDrawColor(renderer, UNPACK_COLOR(map->bgcolor));
 		SDL_RenderClear(renderer);
-		
+
 		ML2_Map_render(map, renderer, &camera_pos);
 		Lander_render(l, &camera_pos);
 		render_hud(l->speed, l->fuel_level);
@@ -263,8 +263,8 @@ static void game_loop(void) {
 }
 
 int main(int, char *argv[]) {
-	
-	const char *map_path = argv[1] ? argv[1] : "test4.ml2"; 
+
+	const char *map_path = argv[1] ? argv[1] : "test4.ml2";
 	init_game(map_path);
 	title_screen();
 	game_loop();
