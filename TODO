@@ -5,11 +5,13 @@
 	- Switchable controls, more supported control schemes
 	- Create map editor (either outside of game, or built in) (In progress!)
 		- It does not need to run on everything that the game does, it can be an optional component.
+	- Procedural level generation
+	- Support more formats than just BMP
 
 - Add the following to the map file spec:
 	- Tile attributes (will increase size)
 	- Use extra bits from this addition to increase tile limit (to 256?)
 
 - API changes:
-	- Add flag to tilesheet creation for whether you want to create a surface or texture (or both)
+	- Embed font.bmp into the program (maybe)
 	- Allow changing the color of text in font API (both by calling a function, and using escape codes)
