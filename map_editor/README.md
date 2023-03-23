@@ -5,5 +5,9 @@ While there is a Makefile present in here, this program should not be built with
 
 ## Dependencies
 
-Along with everything required for the main game, you need [ImGui](https://github.com/ocornut/imgui/).
+Along with everything required for the main game, you need [Dear ImGui](https://github.com/ocornut/imgui/).
 All you need to do is clone the master branch into the directory `imgui`, within this directory.
+
+## Included Libraries
+
+- [tiny file dialogs](http://tinyfiledialogs.sourceforge.net/)

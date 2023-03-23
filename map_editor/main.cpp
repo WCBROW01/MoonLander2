@@ -12,11 +12,15 @@
 #include "tiles.h"
 #include "map.h"
 
+#include "tinyfiledialogs.h"
+
 #if !SDL_VERSION_ATLEAST(2,0,17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
 
 static char file_path[PATH_MAX] = ""; // File path for the currently open map
+
+static char const *image_filter_patterns[] = {"*.bmp"};
 
 void new_window(bool *open, ML2_Map **map, SDL_Renderer *renderer, SDL_Point *camera_pos) {
 	if (!ImGui::Begin("Create New Map", open)) {
@@ -57,9 +61,13 @@ void new_window(bool *open, ML2_Map **map, SDL_Renderer *renderer, SDL_Point *ca
 		
 		ML2_Map_free(*map);
 		*map = ML2_Map_create(params, renderer);
-		if (!*map) fprintf(stderr, "SDL_Map_create: %s\n", SDL_GetError());
+		if (!*map) {
+			fprintf(stderr, "SDL_Map_create: %s\n", SDL_GetError());
+			if (params.tiles) TileSheet_destroy(params.tiles);
+		}
 		*camera_pos = {0, 0};
 		*open = false;
+		file_path[0] = '\0'; // clear working path
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Cancel")) {
@@ -68,63 +76,23 @@ void new_window(bool *open, ML2_Map **map, SDL_Renderer *renderer, SDL_Point *ca
 	ImGui::End();
 }
 
-void open_window(bool *open, ML2_Map **map, SDL_Renderer *renderer) {
-	if (!ImGui::Begin("Open Map")) {
-		ImGui::End();
-		return;
-	}
-	
-	static char working_path[PATH_MAX];
-	static bool refresh_text = true;
-	
-	if (refresh_text) {
-		strncpy(working_path, file_path, PATH_MAX);
-		refresh_text = false;
-	}
-	
-	ImGui::InputText("Path", working_path, PATH_MAX);
-	if (ImGui::Button("Open")) {
-		ML2_Map_free(*map);
-		strncpy(file_path, working_path, PATH_MAX);
-		refresh_text = true;
+static char const *map_filter_patterns[] = {"*.ml2"};
+
+void open_dialog(ML2_Map **map, SDL_Renderer *renderer) {
+	char *result = tinyfd_openFileDialog("Open", NULL, 1, map_filter_patterns, "map files", 0);
+	if (result) {
+		strcpy(file_path, result);
 		*map = ML2_Map_loadFromFile(file_path, renderer);
-		*open = false;
 	}
-	ImGui::SameLine();
-	if (ImGui::Button("Cancel")) {
-		refresh_text = true;
-		*open = false;
-	}
-	ImGui::End();
 }
 
-void save_as_window(bool *open, ML2_Map *map) {
-	if (!ImGui::Begin("Save As")) {
-		ImGui::End();
-		return;
-	}
-	
-	static char working_path[PATH_MAX];
-	static bool refresh_text = true;
-	
-	if (refresh_text) {
-		strncpy(working_path, file_path, PATH_MAX);
-		refresh_text = false;
-	}
-	
-	ImGui::InputText("Path", working_path, PATH_MAX);
-	if (ImGui::Button("Save")) {
-		strncpy(file_path, working_path, PATH_MAX);
-		refresh_text = true;
+void save_as_dialog(ML2_Map *map) {
+	if (!map) return;
+	char *result = tinyfd_saveFileDialog("Save As", NULL, 1, map_filter_patterns, "map files");
+	if (result) {
+		strcpy(file_path, result);
 		ML2_Map_save(map, file_path);
-		*open = false;
 	}
-	ImGui::SameLine();
-	if (ImGui::Button("Cancel")) {
-		refresh_text = true;
-		*open = false;
-	}
-	ImGui::End();
 }
 
 void tiles_window(bool *open, ML2_Map *map, int *selected_tile) {
@@ -171,6 +139,9 @@ void about_window(bool *open) {
 }	
 
 int main(int argc, char *argv[]) {
+	// the map functions use fopen so they can't be overriden with UTF-16 as would be ideal.
+	tinyfd_winUtf8 = 0;
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) < 0) {
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
 		return 1;
@@ -212,8 +183,6 @@ int main(int argc, char *argv[]) {
 	
 	// Open window state
 	bool show_new_window = false;
-	bool show_open_window = false;
-	bool show_save_as_window = false;
 	bool show_tiles_window = false;
 	bool show_demo_window = false;
 	bool show_about_window = false;
@@ -242,14 +211,14 @@ int main(int argc, char *argv[]) {
 					show_new_window = true;
 				}
 				if (ImGui::MenuItem("Open")) {
-					show_open_window = true;
+					open_dialog(&map, renderer);
 				}
 				if (ImGui::MenuItem("Save")) {
-					if (map) ML2_Map_save(map, file_path);
-					else show_save_as_window = true;
+					if (file_path[0]) ML2_Map_save(map, file_path);
+					else save_as_dialog(map);
 				}
 				if (ImGui::MenuItem("Save As")) {
-					show_save_as_window = true;
+					save_as_dialog(map);
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Quit")) {
@@ -283,8 +252,6 @@ int main(int argc, char *argv[]) {
 		}
 		
 		if (show_new_window) new_window(&show_new_window, &map, renderer, &camera_pos);
-		if (show_open_window) open_window(&show_open_window, &map, renderer);
-		if (show_save_as_window) save_as_window(&show_save_as_window, map);
 		if (show_tiles_window) tiles_window(&show_tiles_window, map, &selected_tile);
 		if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 		if (show_about_window) about_window(&show_about_window);

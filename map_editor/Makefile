@@ -17,14 +17,15 @@
 EXE = ../ml2-editor
 IMGUI_DIR = imgui
 LIB_DIR = ../shared
-SOURCES = main.cpp
+SOURCES = main.cpp tinyfiledialogs.c
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_sdlrenderer.cpp
-OBJS = $(SOURCES:.cpp=.o)
+OBJS = $(SOURCES:.cpp,.c=.o)
 UNAME_S := $(shell uname -s)
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(LIB_DIR) `sdl2-config --cflags`
 CXXFLAGS += -Os -Wall -Wformat
+CFLAGS = -Os -Wall -Wformat
 LDFLAGS =
 
 ##---------------------------------------------------------------------
@@ -36,6 +37,7 @@ ifeq ($(UNAME_S), Linux) #LINUX
 	LDFLAGS += `sdl2-config --libs`
 
 	CXXFLAGS += -flto
+	CFLAGS += -flto
 endif
 
 ifeq ($(UNAME_S), Darwin) #APPLE
@@ -48,12 +50,15 @@ endif
 
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
-	LDFLAGS += `sdl2-config --static-libs`
+	LDFLAGS += -LC:/mingw/lib -lcomdlg32 -lole32 `sdl2-config --static-libs`
 endif
 
 ##---------------------------------------------------------------------
 ## BUILD RULES
 ##---------------------------------------------------------------------
+
+%.o:%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

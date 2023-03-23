@@ -45,3 +45,8 @@ If your system isn't already set up to use the SDL 2 library, you can provide a 
 First you'll want to grab the SDL 2 development libraries from the [SDL 2 download page](https://www.libsdl.org/download-2.0.php). Grab the file specifically for Visual C++.
 
 The project is set up such that you can just drop the contents of the archive into `.\libs\SDL2`. After that, you should be able to drop the DLL for the CPU architecture you want to build into the project root and hit the build button for whatever configuration you would like to use.
+
+## Included Libraries
+
+- [tiny file dialogs](http://tinyfiledialogs.sourceforge.net/)
+
