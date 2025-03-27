@@ -6,7 +6,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
-#include "imgui_impl_sdlrenderer.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 #include "tilesheet.h"
 #include "tiles.h"
@@ -112,7 +112,7 @@ void tiles_window(bool *open, ML2_Map *map, int *selected_tile) {
 			ImGui::PushID(i);
 			bool selected = *selected_tile == i;
 			if (selected) ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
-			if (ImGui::ImageButton("##tile", map->tiles->texture, ImVec2(map->tiles->tile_width, map->tiles->tile_height), uv0, uv1)) {
+			if (ImGui::ImageButton("##tile", (ImTextureID) map->tiles->texture, ImVec2(map->tiles->tile_width, map->tiles->tile_height), uv0, uv1)) {
 				*selected_tile = i;
 			}
 			if (selected) ImGui::PopStyleColor();
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 	// Init backends
 	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer_Init(renderer);
+	ImGui_ImplSDLRenderer2_Init(renderer);
 
 	// Map state
 	ML2_Map *map = nullptr;
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		// Start Dear ImGui frame
-		ImGui_ImplSDLRenderer_NewFrame();
+		ImGui_ImplSDLRenderer2_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
@@ -318,14 +318,14 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
 		SDL_RenderPresent(renderer);
 	}
 
 	// Cleanup
 	ML2_Map_free(map);
 
-	ImGui_ImplSDLRenderer_Shutdown();
+	ImGui_ImplSDLRenderer2_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
 
